@@ -161,6 +161,8 @@ var additiveSynth = function(tone,harmonics,duration){ // Harmonics are arrays s
 	}
 };
 
+// Array manipulation functions
+
 var merge = function(durRay,canvasRay,whereAt,level){
 	var outRay = [];
 	whereAt = typeof whereAt == 'undefined' ? 0:whereAt;
