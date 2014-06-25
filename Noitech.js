@@ -183,3 +183,32 @@ var invert = function(durRay){
 	return outRay;
 }
 
+// System Functions
+
+var buildFile = function(fileName,channels){
+	var manipulatedChannels = channels
+	var sameLength = true
+	// The channels all have to be the same lenth, check to see if thats the case before proceeding
+	for (channel = 0; channel < manipulatedChannels.length; channel++){
+		for (relaChannel = 0; channel < (manipulatedChannels.length-channel); relaChannel++){
+			if (channels[channel].length !== manipulatedChannels[relaChannel+channel].length){
+				sameLength=false;
+			}
+	if (!sameLength){
+		var longestChannelsLength=0;
+		// If the channels are not all the same length, establish what the longest channel is
+		for (channel=0; channel<manipulatedChannels.length; channel++){
+			if (manipulatedChannels[channel].length > longestChannelLength){
+				longestChannelsLength=manipulatedChannels[channel].length;
+			}
+		}
+		// Add a duration of "silence" to each channel in the amount necessary to bring it to the length of the longest channel 
+		for (channel=0; channel<channels.length){
+			manipulatedChannels[channel].concat(Array(manipulatedChannels[channel].length-longestChannelsLength).join('0').split('').map(parseFloat));
+		}
+	}
+		}
+	}
+}
+
+
