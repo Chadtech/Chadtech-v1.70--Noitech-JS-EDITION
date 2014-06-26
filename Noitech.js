@@ -181,7 +181,26 @@ var invert = function(durRay){
 		outRay.push(durRay[sample]*(-1));
 	}
 	return outRay;
-}
+};
+
+// This one I just made up. Hopefully itll work. 
+var quietReducer = function(durRay,degree,amplitude){
+	var amplitude = amplitude || 32767;
+	var outRay =[];
+	for (moment = 0; moment<duration; moment++){
+		outRay.push(0);
+	}
+	for (moment=0; moment<durRay.length; moment++){
+		if (durRay[moment]>0){
+			outRay[moment]=durRay[moment]*Math.pow((durRay[moment]/amplitude),(1+degree));	
+		}
+		else{
+			outRay[moment]=durRay[moment]*(-1)*Math.pow((durRay[moment]/amplitude),(1+degree));
+		}
+	}
+	return outRay;
+
+};
 
 // System Functions
 
