@@ -203,10 +203,17 @@ var buildFile = function(fileName,channels){
 			}
 		}
 		// Add a duration of "silence" to each channel in the amount necessary to bring it to the length of the longest channel 
-		for (channel=0; channel<channels.length){
-			manipulatedChannels[channel].concat(Array(manipulatedChannels[channel].length-longestChannelsLength).join('0').split('').map(parseFloat));
+		for (channel=0; channel<manipulatedChannels.length){
+			// The internet told me to do this, but it looks so messy:			manipulatedChannels[channel].concat(Array(manipulatedChannels[channel].length-longestChannelsLength).join('0').split('').map(parseFloat));
+			for (sampleDif=0; sampleDif<(longestChannelsLength-manipulatedChannels[channel].length); channel++){
+				manipulatedChannels[channel].push(0);
+			}
 		}
 	}
+	// Set up the header (?) of the wav file
+	var header = []
+
+	header.concat(['52','49','46','46']) // 'RIFF' in hexadecimal
 		}
 	}
 }
