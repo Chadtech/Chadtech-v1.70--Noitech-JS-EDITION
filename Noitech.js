@@ -232,7 +232,20 @@ var buildFile = function(fileName,channels){
 	// Set up the header (?) of the wav file
 	var header = []
 
-	header.concat(['52','49','46','46']) // 'RIFF' in hexadecimal
+	header.concat([0x4952]); header.concat([0x4646]); // 'RIFF' in hexadecimal
+	
+	header.concat([]); // I need to figure out how to calculate the file size
+
+	header.concat([0x5751]); header.concat([0x5645]) // 'WAVE' in hexadecimal
+	header.concat([0x666d]); header.concat([0x7420]) // Means 'fmt[SQUARE]', I dont know what this means. But its a part of wave files
+
+	header.concat([0x1000]); header.concat([0x0000]) // This means '16', the size of each sample
+	
+	header.concat([0x0100]); // This indicates that no compression is going on
+	if (channels.length>16){
+		//  WORK IN PROGRESS
+	}
+	header.concat([0x0200]); // This is the number of channels
 		}
 	}
 }
