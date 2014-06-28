@@ -1,3 +1,5 @@
+var fs = require('fs');
+
 // 'Convenience' Functions
 
 var secondsToSamples = function(duration,sampleRate){
@@ -203,6 +205,21 @@ var quietReducer = function(durRay,degree,amplitude){
 };
 
 // System Functions
+
+var openWave = function(fileName){
+	var outRay = [];
+	var rawWave = fs.readFileSync(fileName);
+	var waveNumbers = [];
+	for (datum = 0; datum<rawWave.length; datum++){
+		waveNumbers.push(rawWave.readUInt8(datum));
+	}
+	var dataLength = waveNumbers[40]+(waveNumbers[41]*256)+(waveNumbers[42]*65536)+(waveNumbers[43]*16777216);
+	for sample = 0; sample<dataLength+4; sample++){
+		if (sample$2==0){
+			outRay.push((waveNumbers[sample]*256)+waveNumbers[sample]);
+		}
+	}
+}
 
 var buildFile = function(fileName,channels){
 	var manipulatedChannels = channels
