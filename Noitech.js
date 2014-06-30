@@ -1,15 +1,7 @@
+/*jslint node: true */
+"use strict";
+
 var fs = require('fs');
-
-// 'Convenience' Functions
-
-var secondsToSamples = function(duration,sampleRate){
-	return duration*sampleRate
-}
-
-var frequencyInSamples = function(tone,sampleRate){
-	var sampleRate = sampleRate || 44100;
-	return tone/44100
-}
 
 // Tone Making Functions
 
@@ -17,9 +9,9 @@ var makeSine = function(tone,duration){
 	var outRay = [];
 	for (sample = 0; sample<duration; sample++){
 		outRay.push(Math.sin(Math.PI*sample*tone));
-	};
+	}
 	return outRay;
-}
+};
 
 var makeSaw=function(tone,duration,harmonicCount,amplitude,enharmonicity,harmonicDecay){
 	var amplitude = amplitude || 32767;
@@ -210,15 +202,18 @@ var openWave = function(fileName){
 	var outRay = [];
 	var rawWave = fs.readFileSync(fileName);
 	var waveNumbers = [];
+	console.log('RAW WAVE',rawWave.readUInt8);
 	for (datum = 0; datum<rawWave.length; datum++){
 		waveNumbers.push(rawWave.readUInt8(datum));
 	}
+	console.log('WAVE NUMBERS',waveNumbers.toString());
 	var dataLength = waveNumbers[40]+(waveNumbers[41]*256)+(waveNumbers[42]*65536)+(waveNumbers[43]*16777216);
-	for sample = 0; sample<dataLength+4; sample++){
-		if (sample$2==0){
+	for (sample = 0; sample<waveNumbers.length; sample++){
+		if (sample%2==0){
 			outRay.push((waveNumbers[sample]*256)+waveNumbers[sample]);
 		}
 	}
+	console.log('OUTRAY : ',outRay.toString());
 }
 
 var buildFile = function(fileName,channels){
@@ -239,7 +234,7 @@ var buildFile = function(fileName,channels){
 			}
 		}
 		// Add a duration of "silence" to each channel in the amount necessary to bring it to the length of the longest channel 
-		for (channel=0; channel<manipulatedChannels.length){
+		for (channel=0; channel<manipulatedChannels.length; channel++){
 			// The internet told me to do this, but it looks so messy:			manipulatedChannels[channel].concat(Array(manipulatedChannels[channel].length-longestChannelsLength).join('0').split('').map(parseFloat));
 			for (sampleDif=0; sampleDif<(longestChannelsLength-manipulatedChannels[channel].length); channel++){
 				manipulatedChannels[channel].push(0);
@@ -267,4 +262,4 @@ var buildFile = function(fileName,channels){
 	}
 }
 
-
+openWave('twoHundredSamples.wav');
