@@ -5,10 +5,11 @@ var fs = require('fs');
 
 // Tone Making Functions
 
-var makeSine = function(tone,duration){
+var makeSine = function(tone,duration,amplitude){
+	var amplitude = amplitude || 32767;
 	var outRay = [];
 	for (var sample = 0; sample<duration; sample++){
-		outRay.push(Math.sin(Math.PI*sample*tone));
+		outRay.push(amplitude*Math.sin(Math.PI*2*sample*tone));
 	}
 	return outRay;
 };
@@ -294,3 +295,6 @@ var buildFile = function(fileName,channels){
 	fs.writeFile(fileName,outputFile);
 
 };
+
+console.log(makeSine(400/44100,44100));
+buildFile('SINETEST.wav',[makeSine(400/44100,44100)]);
