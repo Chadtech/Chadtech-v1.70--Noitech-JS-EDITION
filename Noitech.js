@@ -293,4 +293,4 @@ var buildFile = function(fileName,channels){
 };
 
 
-buildFile('RECONSTRUCTEDRIDE.wav',openWave('MCRide_1.wav'));
+buildFile('RECONSTRUCTEDRIDE.wav',openWave('counting.wav'));
