@@ -200,8 +200,6 @@ var openWave = function(fileName){
 			channels[channels.length-1].push((rawAudio[sample]*numberOfChannels)+channel);
 		}
 	}
-	console.log('OPENED FILE');
-	fs.writeFile('testOutput.txt',channels.toString());
 	return channels;
 };
 
@@ -216,7 +214,6 @@ var buildFile = function(fileName,channels){
 			}
 		}
 	}
-	console.log('SAME LENGTH:',sameLength);
 	if (!sameLength){
 		var longestChannelsLength=0;
 		// If the channels are not all the same length, establish what the longest channel is
@@ -233,7 +230,6 @@ var buildFile = function(fileName,channels){
 			}
 		}
 	}
-	console.log('FINISHED MANIPULATED CHANNELS');
 	// Make an Array, so that the audio samples can be aggregated in the standard way wave files are (For each sample i in channels a, b, and c, the sample order goes a(i),b(i),c(i),a(i+1),b(i+1),c(i+1), ... )
 	var channelAudio=[];
 	for (var sample=0; sample<manipulatedChannels[0].length; sample++){
@@ -246,17 +242,9 @@ var buildFile = function(fileName,channels){
 				valueToAdd = manipulatedChannels[channel][sample];
 			}
 			channelAudio.push(valueToAdd)%256;
-			channelAudio.push(Math.floor(valueToAdd)/256);
+			channelAudio.push(Math.floor(valueToAdd/256));
 		}
 	}
-
-	for (var sample=0; sample<channelAudio.length; sample++){
-		if (channelAudio[sample]<0){
-			channelAudio[sample]+=65536;
-		}
-	}
-
-	console.log('NOW BEGINNING HEADER');
 
 	// Make an array containing all the header information, like sample rate, the size of the file, the samples themselves etc
 	var header = [];
@@ -306,6 +294,3 @@ var buildFile = function(fileName,channels){
 	fs.writeFile(fileName,outputFile);
 
 };
-
-
-buildFile('RECONSTRUCTEDRIDE.wav',openWave('MCRide_metadataclean.wav'));
