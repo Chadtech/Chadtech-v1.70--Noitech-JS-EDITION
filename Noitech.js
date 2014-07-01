@@ -216,6 +216,7 @@ var buildFile = function(fileName,channels){
 			}
 		}
 	}
+	console.log('SAME LENGTH:',sameLength);
 	if (!sameLength){
 		var longestChannelsLength=0;
 		// If the channels are not all the same length, establish what the longest channel is
@@ -237,7 +238,21 @@ var buildFile = function(fileName,channels){
 	var channelAudio=[];
 	for (var sample=0; sample<manipulatedChannels[0].length; sample++){
 		for (var channel=0; channel<manipulatedChannels.length; channel++){
-			channelAudio.push(manipulatedChannels[channel][sample]);
+			var valueToAdd = 0;
+			if (manipulatedChannels[channel][sample]<0){
+				valueToAdd = manipulatedChannels[channel][sample]+65536;
+			}
+			else{
+				valueToAdd = manipulatedChannels[channel][sample];
+			}
+			channelAudio.push(valueToAdd)%256;
+			channelAudio.push(Math.floor(valueToAdd)/256);
+		}
+	}
+
+	for (var sample=0; sample<channelAudio.length; sample++){
+		if (channelAudio[sample]<0){
+			channelAudio[sample]+=65536;
 		}
 	}
 
@@ -293,4 +308,4 @@ var buildFile = function(fileName,channels){
 };
 
 
-buildFile('RECONSTRUCTEDRIDE.wav',openWave('counting.wav'));
+buildFile('RECONSTRUCTEDRIDE.wav',openWave('MCRide_metadataclean.wav'));
