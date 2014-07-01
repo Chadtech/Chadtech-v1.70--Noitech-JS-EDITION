@@ -207,46 +207,76 @@ var buildFile = function(fileName,channels){
 	var manipulatedChannels = channels;
 	var sameLength = true;
 	// The channels all have to be the same lenth, check to see if thats the case before proceeding
-	for (var channel = 0; channel < manipulatedChannels.length; channel++){
-		for (var relaChannel = 0; channel < (manipulatedChannels.length-channel); relaChannel++){
-			if (channels[channel].length !== manipulatedChannels[relaChannel+channel].length){
+	for (var unalteredChannel = 0; unalteredChannel < manipulatedChannels.length; unalteredChannel++){
+		for (var relativeChannel = 0; relativeChannel < (manipulatedChannels.length-channel); relativeChannel++){
+			if (manipulatedChannels[channel].length !== manipulatedChannels[relativeChannel+channel].length){
 				sameLength=false;
 			}
+		}
+	}
 	if (!sameLength){
 		var longestChannelsLength=0;
 		// If the channels are not all the same length, establish what the longest channel is
-		for (channel=0; channel<manipulatedChannels.length; channel++){
+		for (var channel=0; channel<manipulatedChannels.length; channel++){
 			if (manipulatedChannels[channel].length > longestChannelsLength){
 				longestChannelsLength=manipulatedChannels[channel].length;
 			}
 		}
 		// Add a duration of "silence" to each channel in the amount necessary to bring it to the length of the longest channel 
-		for (channel=0; channel<manipulatedChannels.length; channel++){
+		for (var channel=0; channel<manipulatedChannels.length; channel++){
 			// The internet told me to do this, but it looks so messy:			manipulatedChannels[channel].concat(Array(manipulatedChannels[channel].length-longestChannelsLength).join('0').split('').map(parseFloat));
 			for (var sampleDif=0; sampleDif<(longestChannelsLength-manipulatedChannels[channel].length); channel++){
 				manipulatedChannels[channel].push(0);
 			}
 		}
 	}
-	// Set up the header (?) of the wav file
-	var header = [];
-
-	header.concat([0x4952]); header.concat([0x4646]); // 'RIFF' in hexadecimal
-	
-	header.concat([]); // I need to figure out how to calculate the file size
-
-	header.concat([0x5751]); header.concat([0x5645]); // 'WAVE' in hexadecimal
-	header.concat([0x666d]); header.concat([0x7420]); // Means 'fmt[SQUARE]', I dont know what this means. But its a part of wave files
-
-	header.concat([0x1000]); header.concat([0x0000]); // This means '16', the size of each sample
-	
-	header.concat([0x0100]); // This indicates that no compression is going on
-	if (channels.length>16){
-		//  WORK IN PROGRESS
-	}
-	header.concat([0x0200]); // This is the number of channels
+	// Make an Array, so that the audio samples can be aggregated in the standard way wave files are (For each sample i in channels a, b, and c, the sample order goes a(i),b(i),c(i),a(i+1),b(i+1),c(i+1), ... )
+	var channelAudio=[];
+	for (var sample=0; sample<manipulatedChannels[0].length; sample++){
+		for (var channel=0; channel<manipulatedChannels.length; sample++){
+			channelAudio.push(manipulatedChannels[channel][sample]);
 		}
 	}
+	// Make an array containing all the header information, like sample rate, the size of the file, the samples themselves etc
+	var header = [];
+
+	header=header.concat([82,73,70,70]); // 'RIFF' in decimal
+
+	var thisWavFileSize=(manipulatedChannels[0].length*2*manipulatedChannels.length)+36;
+	var wavFileSizeZE=thisWavFileSize%256;
+	var wavFileSizeON=thisWavFileSize%65536;
+	var wavFileSizeTW=thisWavFileSize%16777216;
+	var wavFileSizeTH=thisWavFileSize%4294967296;
+	header=header.concat([wavFileSizeZE,wavFileSizeON,wavFileSizeTW,wavFileSizeTH]); // This is the size of the file
+
+	header=header.concat([87,65,86,69]); // 'WAVE' in decimal
+
+	header=header.concat([102,109,116,32]); // 'fmt[SQUARE]' in decimal
+
+	header=header.concat([16,0,0,0]); // The size of the subchunk after this chunk of data
+
+	header=header.concat([1,0,manipulatedChannels.length%256,Math.floor(manipulatedChannels/256)]); // The second half of this datum is the number of channels
+	// The maximum number of channels is 65535
+
+	header=header.concat([44100%256,Math.floor(44100/256),0,0]); // Sample Rate 44100.
+
+	header=header.concat([manipulatedChannels.length*2,0,16,0]); // The first half is the block align (2*number of channels), the second half is te bits per sample (16)
+
+	header=header.concat([100,97,116,97]); // 'data' in decimal
+
+	var sampleDataSize = manipulatedChannels.length*manipulatedChannels[0].length*2;
+	var sampleDataSizeZE = sampleDataSize%256;
+	var sampleDataSizeON = sampleDataSize%65536;
+	var sampleDataSizeTW = sampleDataSize%16777216;
+	var sampleDataSizeTH = sampleDataSize%4294967296;
+	header=header.concat([sampleDataSizeZE,sampleDataSizeON,sampleDataSizeTW,sampleDataSizeTH]);
+
+	var outputArray = header.concat(channelAudio);
+
+	var outputFile = new Buffer(outputArray);
+
+	fs.writeFile(fileName,outputFile);
 };
+
 
 openWave('MCRide_1.wav');
