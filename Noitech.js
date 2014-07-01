@@ -197,9 +197,11 @@ var openWave = function(fileName){
 	for (var channel = 0; channel<numberOfChannels; channel++){
 		channels.push([]);
 		for (var sample = 0; sample<(rawAudio.length/numberOfChannels); sample++){
-			channels[channels.length].push((sample*numberOfChannels)+channel);
+			channels[channels.length-1].push((rawAudio[sample]*numberOfChannels)+channel);
 		}
 	}
+	console.log('OPENED FILE');
+	fs.writeFile('testOutput.txt',channels.toString());
 	return channels;
 };
 
@@ -230,13 +232,17 @@ var buildFile = function(fileName,channels){
 			}
 		}
 	}
+	console.log('FINISHED MANIPULATED CHANNELS');
 	// Make an Array, so that the audio samples can be aggregated in the standard way wave files are (For each sample i in channels a, b, and c, the sample order goes a(i),b(i),c(i),a(i+1),b(i+1),c(i+1), ... )
 	var channelAudio=[];
 	for (var sample=0; sample<manipulatedChannels[0].length; sample++){
-		for (var channel=0; channel<manipulatedChannels.length; sample++){
+		for (var channel=0; channel<manipulatedChannels.length; channel++){
 			channelAudio.push(manipulatedChannels[channel][sample]);
 		}
 	}
+
+	console.log('NOW BEGINNING HEADER');
+
 	// Make an array containing all the header information, like sample rate, the size of the file, the samples themselves etc
 	var header = [];
 
@@ -244,9 +250,9 @@ var buildFile = function(fileName,channels){
 
 	var thisWavFileSize=(manipulatedChannels[0].length*2*manipulatedChannels.length)+36;
 	var wavFileSizeZE=thisWavFileSize%256;
-	var wavFileSizeON=thisWavFileSize%65536;
-	var wavFileSizeTW=thisWavFileSize%16777216;
-	var wavFileSizeTH=thisWavFileSize%4294967296;
+	var wavFileSizeON=Math.floor(thisWavFileSize/256)%256;
+	var wavFileSizeTW=Math.floor(thisWavFileSize/65536)%256;
+	var wavFileSizeTH=Math.floor(thisWavFileSize/16777216)%256;
 	header=header.concat([wavFileSizeZE,wavFileSizeON,wavFileSizeTW,wavFileSizeTH]); // This is the size of the file
 
 	header=header.concat([87,65,86,69]); // 'WAVE' in decimal
@@ -260,15 +266,22 @@ var buildFile = function(fileName,channels){
 
 	header=header.concat([44100%256,Math.floor(44100/256),0,0]); // Sample Rate 44100.
 
+	var byteRate = 44100*manipulatedChannels.length*2;
+	var byteRateZE = byteRate%256;
+	var byteRateON = Math.floor(byteRate/256)%256;
+	var byteRateTW = Math.floor(byteRate/65536)%256;
+	var byteRateTH = Math.floor(byteRate/16777216)%256;
+	header=header.concat([byteRateZE,byteRateON,byteRateTW,byteRateTH]);
+
 	header=header.concat([manipulatedChannels.length*2,0,16,0]); // The first half is the block align (2*number of channels), the second half is te bits per sample (16)
 
 	header=header.concat([100,97,116,97]); // 'data' in decimal
 
 	var sampleDataSize = manipulatedChannels.length*manipulatedChannels[0].length*2;
 	var sampleDataSizeZE = sampleDataSize%256;
-	var sampleDataSizeON = sampleDataSize%65536;
-	var sampleDataSizeTW = sampleDataSize%16777216;
-	var sampleDataSizeTH = sampleDataSize%4294967296;
+	var sampleDataSizeON = Math.floor(sampleDataSize/256)%256;
+	var sampleDataSizeTW = Math.floor(sampleDataSize/65536)%256;
+	var sampleDataSizeTH = Math.floor(sampleDataSize/16777216)%256;
 	header=header.concat([sampleDataSizeZE,sampleDataSizeON,sampleDataSizeTW,sampleDataSizeTH]);
 
 	var outputArray = header.concat(channelAudio);
@@ -276,7 +289,8 @@ var buildFile = function(fileName,channels){
 	var outputFile = new Buffer(outputArray);
 
 	fs.writeFile(fileName,outputFile);
+
 };
 
 
-openWave('MCRide_1.wav');
+buildFile('RECONSTRUCTEDRIDE.wav',openWave('MCRide_1.wav'));
