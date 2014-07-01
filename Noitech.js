@@ -7,7 +7,7 @@ var fs = require('fs');
 
 var makeSine = function(tone,duration){
 	var outRay = [];
-	for (sample = 0; sample<duration; sample++){
+	for (var sample = 0; sample<duration; sample++){
 		outRay.push(Math.sin(Math.PI*sample*tone));
 	}
 	return outRay;
@@ -92,7 +92,7 @@ var makeTriangle =function(tone,duration,harmonicCount,amplitude,enharmonicity,h
 var makeSquare = function(tone,duration,harmonicCount,amplitude,enharmonicity,harmonicDecay){
 	var amplitude = amplitude || 32767;
 	var enharmonify = function(enharmonicity,harmonic){
-		value = typeof enharmonicity == 'undefined' ? 1:(1+(harmonic*enharmonicity));
+		var value = typeof enharmonicity == 'undefined' ? 1:(1+(harmonic*enharmonicity));
 		return value;
 	};
 	var decay = function(harmonicDecay,harmonic,moment){
@@ -109,8 +109,8 @@ var makeSquare = function(tone,duration,harmonicCount,amplitude,enharmonicity,ha
 		}
 	};
 	var outRay = Array(duration);
-	for (harmonic=1; harmonic<=harmonicCount; harmonic++){
-		for (moment =0; moment<outRay.length ; moment++){
+	for (var harmonic=1; harmonic<=harmonicCount; harmonic++){
+		for (var moment =0; moment<outRay.length ; moment++){
 			outRay[moment]=
 				decay(harmonicDecay,harmonic,moment)
 				*(amplitude/((harmonic*2)-1))
@@ -202,18 +202,25 @@ var openWave = function(fileName){
 	var outRay = [];
 	var rawWave = fs.readFileSync(fileName);
 	var waveNumbers = [];
-	console.log('RAW WAVE',rawWave.readUInt8);
-	for (datum = 0; datum<rawWave.length; datum++){
+	console.log('RAW WAVE',rawWave);
+	for (var datum=0; datum<rawWave.length;datum++){
+		console.log(typeof rawWave.readUInt8(datum))
 		waveNumbers.push(rawWave.readUInt8(datum));
 	}
-	console.log('WAVE NUMBERS',waveNumbers.toString());
 	var dataLength = waveNumbers[40]+(waveNumbers[41]*256)+(waveNumbers[42]*65536)+(waveNumbers[43]*16777216);
-	for (sample = 0; sample<waveNumbers.length; sample++){
+	console.log(dataLength)
+	var positiveAmplitude = true;
+	for (var sample = 0; sample<waveNumbers.length; sample++){
 		if (sample%2==0){
-			outRay.push((waveNumbers[sample]*256)+waveNumbers[sample]);
+			if (waveNumbers[sample+1]>=128){
+				outRay.push((-1)*(65536-(waveNumbers[sample]+(waveNumbers[sample+1]*256))));
+			}
+			else{
+				outRay.push(waveNumbers[sample]+(waveNumbers[sample+1]*256));
+			}
 		}
 	}
-	console.log('OUTRAY : ',outRay.toString());
+	console.log('OUTRAY : ',outRay);
 }
 
 var buildFile = function(fileName,channels){
@@ -262,4 +269,4 @@ var buildFile = function(fileName,channels){
 	}
 }
 
-openWave('twoHundredSamples.wav');
+console.log(openWave('counting.wav'));
