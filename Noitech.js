@@ -199,28 +199,31 @@ var quietReducer = function(durRay,degree,amplitude){
 // System Functions
 
 var openWave = function(fileName){
-	var outRay = [];
+	var rawAudio = [];
 	var rawWave = fs.readFileSync(fileName);
 	var waveNumbers = [];
-	console.log('RAW WAVE',rawWave);
 	for (var datum=0; datum<rawWave.length;datum++){
-		console.log(typeof rawWave.readUInt8(datum))
 		waveNumbers.push(rawWave.readUInt8(datum));
 	}
-	var dataLength = waveNumbers[40]+(waveNumbers[41]*256)+(waveNumbers[42]*65536)+(waveNumbers[43]*16777216);
-	console.log(dataLength)
-	var positiveAmplitude = true;
-	for (var sample = 0; sample<waveNumbers.length; sample++){
+	var numberOfChannels=waveNumbers[20]
+	for (var sample = 44; sample<waveNumbers.length; sample++){
 		if (sample%2==0){
 			if (waveNumbers[sample+1]>=128){
-				outRay.push((-1)*(65536-(waveNumbers[sample]+(waveNumbers[sample+1]*256))));
+				rawAudio.push((-1)*(65536-(waveNumbers[sample]+(waveNumbers[sample+1]*256))));
 			}
 			else{
-				outRay.push(waveNumbers[sample]+(waveNumbers[sample+1]*256));
+				rawAudio.push(waveNumbers[sample]+(waveNumbers[sample+1]*256));
 			}
 		}
 	}
-	console.log('OUTRAY : ',outRay);
+	var channels=[];
+	for (var channel = 0; channel<numberOfChannels; channel++){
+		channels.push([]);
+		for (var sample = 0; sample<(rawAudio.length/numberOfChannels); sample++){
+			channels[channels.length].push((sample*numberOfChannels)+channel);
+		}
+	}
+	return channels;
 }
 
 var buildFile = function(fileName,channels){
@@ -269,4 +272,4 @@ var buildFile = function(fileName,channels){
 	}
 }
 
-console.log(openWave('counting.wav'));
+openWave('MCRide_1.wav')
