@@ -32,20 +32,13 @@ var makeSaw=function(tone,duration,harmonicCount,amplitude,enharmonicity,harmoni
 			}
 		}
 	};
-	var outRay = Array(duration);
-	for (harmonic=1; harmonic<=harmonicCount; harmonic++){
-		for (moment =0; moment<outRay.length ; moment++){
-			outRay[moment]=
-				decay(harmonicDecay,harmonic,moment)
-				*(amplitude/harmonic)
-				*Math.pow(-1,harmonic)
-				*Math.sin(
-					moment
-					*Math.PI
-					*2
-					*tone
-					*harmonic
-					*enharmonify(enharmonicity,harmonic));
+	var outRay = [];
+	for (var moment =0; moment<duration ; moment++){
+		outRay.push(0);
+	}
+	for (var harmonic=1; harmonic<=harmonicCount; harmonic++){
+		for (var moment =0; moment<outRay.length ; moment++){
+			outRay[moment]+=decay(harmonicDecay,harmonic,moment)*(amplitude/harmonic)*Math.pow(-1,harmonic)*Math.sin(moment*Math.PI*2*tone*harmonic*enharmonify(enharmonicity,harmonic));
 		}
 	}
 	return outRay;
@@ -70,20 +63,13 @@ var makeTriangle =function(tone,duration,harmonicCount,amplitude,enharmonicity,h
 			}
 		}
 	};
-	var outRay = Array(duration);
-	for (harmonic=1; harmonic<=harmonicCount; harmonic++){
+	var outRay = [];
+	for (var moment =0; moment<duration ; moment++){
+		outRay.push(0);
+	}
+	for (var harmonic=1; harmonic<=harmonicCount; harmonic++){
 		for (moment =0; moment<outRay.length ; moment++){
-			outRay[moment]=
-				decay(harmonicDecay,harmonic,moment)
-				*(amplitude/Math.pow((harmonic*2)+1,2))
-				*Math.pow(-1,harmonic)
-				*Math.sin(
-					moment
-					*Math.PI
-					*2
-					*tone
-					*Math.pow((harmonic*2)+1,2)
-					*enharmonify(enharmonicity,harmonic));
+			outRay[moment]+=decay(harmonicDecay,harmonic,moment)*(amplitude/Math.pow((harmonic*2)+1,2))*Math.pow(-1,harmonic)*Math.sin(moment*Math.PI*2*tone*Math.pow((harmonic*2)+1,2)*enharmonify(enharmonicity,harmonic));
 		}
 	}
 	return outRay;
@@ -108,19 +94,13 @@ var makeSquare = function(tone,duration,harmonicCount,amplitude,enharmonicity,ha
 			}
 		}
 	};
-	var outRay = Array(duration);
+	var outRay = [];
+	for (var moment =0; moment<duration ; moment++){
+		outRay.push(0);
+	}
 	for (var harmonic=1; harmonic<=harmonicCount; harmonic++){
 		for (var moment =0; moment<outRay.length ; moment++){
-			outRay[moment]=
-				decay(harmonicDecay,harmonic,moment)
-				*(amplitude/((harmonic*2)-1))
-				*Math.sin(
-					moment
-					*Math.PI
-					*2
-					*tone
-					*((harmonic*2)-1)
-					*enharmonify(enharmonicity,harmonic));
+			outRay[moment]+=decay(harmonicDecay,harmonic,moment)*(amplitude/((harmonic*2)-1))*Math.sin(moment*Math.PI*2*tone*((harmonic*2)-1)*enharmonify(enharmonicity,harmonic));
 		}
 	}
 	return outRay;
@@ -142,15 +122,12 @@ var additiveSynth = function(tone,harmonics,duration){ // Harmonics are arrays s
 			}
 		}
 	};
-	for (moment = 0; moment<duration; moment++){
+	for (var moment = 0; moment<duration; moment++){
 		outRay.push(0);
 	}
-	for (component = 0; component<harmonics.length; componet++){
+	for (var component = 0; component<harmonics.length; component++){
 		for (moment = 0; moment<duration; moment++){
-			outRay+=Math.sin((Math.PI*2*moment*harmonic[component][0])+(harmonics[component][1]))
-				*harmonic[component][2]
-				*amplitude
-				*decay(harmonic[component][3],1,moment);
+			outRay+=Math.sin((Math.PI*2*moment*harmonics[component][0])+(harmonics[component][1]))*harmonics[component][2]*amplitude*decay(harmonics[component][3],1,moment);
 		}
 	}
 };
@@ -161,17 +138,17 @@ var merge = function(durRay,canvasRay,whereAt,level){
 	var outRay = [];
 	whereAt = typeof whereAt == 'undefined' ? 0:whereAt;
 	level = typeof level == 'undefined' ? 1000:level;
-	for (sample = 0; sample<canvasRay.length; sample++){
+	for (var sample = 0; sample<canvasRay.length; sample++){
 		outRay.push(canvasRay[sample]);
 	};
-	for (sample = 0; sample<durRay.length; sample++){
+	for (var sample = 0; sample<durRay.length; sample++){
 		outRay[whereAt+sample]+=durRay[sample];
-	};
+	}
 };
 
 var invert = function(durRay){
 	var outRay = [];
-	for (sample = 0; sample<durRay.length; sample++){
+	for (var sample = 0; sample<durRay.length; sample++){
 		outRay.push(durRay[sample]*(-1));
 	}
 	return outRay;
@@ -181,7 +158,7 @@ var invert = function(durRay){
 var quietReducer = function(durRay,degree,amplitude){
 	var amplitude = amplitude || 32767;
 	var outRay =[];
-	for (moment = 0; moment<duration; moment++){
+	for (var moment = 0; moment<durRay.length; moment++){
 		outRay.push(0);
 	}
 	for (moment=0; moment<durRay.length; moment++){
@@ -205,9 +182,9 @@ var openWave = function(fileName){
 	for (var datum=0; datum<rawWave.length;datum++){
 		waveNumbers.push(rawWave.readUInt8(datum));
 	}
-	var numberOfChannels=waveNumbers[20]
+	var numberOfChannels=waveNumbers[20];
 	for (var sample = 44; sample<waveNumbers.length; sample++){
-		if (sample%2==0){
+		if (sample%2===0){
 			if (waveNumbers[sample+1]>=128){
 				rawAudio.push((-1)*(65536-(waveNumbers[sample]+(waveNumbers[sample+1]*256))));
 			}
@@ -224,14 +201,14 @@ var openWave = function(fileName){
 		}
 	}
 	return channels;
-}
+};
 
 var buildFile = function(fileName,channels){
-	var manipulatedChannels = channels
-	var sameLength = true
+	var manipulatedChannels = channels;
+	var sameLength = true;
 	// The channels all have to be the same lenth, check to see if thats the case before proceeding
-	for (channel = 0; channel < manipulatedChannels.length; channel++){
-		for (relaChannel = 0; channel < (manipulatedChannels.length-channel); relaChannel++){
+	for (var channel = 0; channel < manipulatedChannels.length; channel++){
+		for (var relaChannel = 0; channel < (manipulatedChannels.length-channel); relaChannel++){
 			if (channels[channel].length !== manipulatedChannels[relaChannel+channel].length){
 				sameLength=false;
 			}
@@ -239,29 +216,29 @@ var buildFile = function(fileName,channels){
 		var longestChannelsLength=0;
 		// If the channels are not all the same length, establish what the longest channel is
 		for (channel=0; channel<manipulatedChannels.length; channel++){
-			if (manipulatedChannels[channel].length > longestChannelLength){
+			if (manipulatedChannels[channel].length > longestChannelsLength){
 				longestChannelsLength=manipulatedChannels[channel].length;
 			}
 		}
 		// Add a duration of "silence" to each channel in the amount necessary to bring it to the length of the longest channel 
 		for (channel=0; channel<manipulatedChannels.length; channel++){
 			// The internet told me to do this, but it looks so messy:			manipulatedChannels[channel].concat(Array(manipulatedChannels[channel].length-longestChannelsLength).join('0').split('').map(parseFloat));
-			for (sampleDif=0; sampleDif<(longestChannelsLength-manipulatedChannels[channel].length); channel++){
+			for (var sampleDif=0; sampleDif<(longestChannelsLength-manipulatedChannels[channel].length); channel++){
 				manipulatedChannels[channel].push(0);
 			}
 		}
 	}
 	// Set up the header (?) of the wav file
-	var header = []
+	var header = [];
 
 	header.concat([0x4952]); header.concat([0x4646]); // 'RIFF' in hexadecimal
 	
 	header.concat([]); // I need to figure out how to calculate the file size
 
-	header.concat([0x5751]); header.concat([0x5645]) // 'WAVE' in hexadecimal
-	header.concat([0x666d]); header.concat([0x7420]) // Means 'fmt[SQUARE]', I dont know what this means. But its a part of wave files
+	header.concat([0x5751]); header.concat([0x5645]); // 'WAVE' in hexadecimal
+	header.concat([0x666d]); header.concat([0x7420]); // Means 'fmt[SQUARE]', I dont know what this means. But its a part of wave files
 
-	header.concat([0x1000]); header.concat([0x0000]) // This means '16', the size of each sample
+	header.concat([0x1000]); header.concat([0x0000]); // This means '16', the size of each sample
 	
 	header.concat([0x0100]); // This indicates that no compression is going on
 	if (channels.length>16){
@@ -270,6 +247,6 @@ var buildFile = function(fileName,channels){
 	header.concat([0x0200]); // This is the number of channels
 		}
 	}
-}
+};
 
-openWave('MCRide_1.wav')
+openWave('MCRide_1.wav');
