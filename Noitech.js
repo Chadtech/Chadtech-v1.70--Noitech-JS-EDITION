@@ -15,7 +15,7 @@ var makeSine = function(tone,duration,amplitude){
 };
 
 var makeSaw=function(tone,duration,harmonicCount,amplitude,enharmonicity,harmonicDecay){
-	var amplitude = amplitude || 32767;
+	var amplitude = amplitude*32767 || 32767;
 	var enharmonify= function(enharmonicity,harmonic){
 		var value = typeof enharmonicity == 'undefined' ? 1:(1+(harmonic*enharmonicity));
 		return value;
@@ -39,8 +39,11 @@ var makeSaw=function(tone,duration,harmonicCount,amplitude,enharmonicity,harmoni
 	}
 	for (var harmonic=1; harmonic<=harmonicCount; harmonic++){
 		for (var moment =0; moment<outRay.length ; moment++){
-			outRay[moment]+=decay(harmonicDecay,harmonic,moment)*(amplitude/harmonic)*Math.pow(-1,harmonic)*Math.sin(moment*Math.PI*2*tone*harmonic*enharmonify(enharmonicity,harmonic));
+			outRay[moment]+=decay(harmonicDecay,harmonic,moment)*amplitude*Math.pow(-1,harmonic)*(Math.sin(moment*Math.PI*2*tone*harmonic*enharmonify(enharmonicity,harmonic))/harmonic);
 		}
+	}
+	for (var sample = 0; sample<outRay.length; sample++){
+		outRay[sample]/=((Math.log(harmonicCount)*(1/Math.PI))+1);
 	}
 	return outRay;
 };
@@ -295,6 +298,3 @@ var buildFile = function(fileName,channels){
 	fs.writeFile(fileName,outputFile);
 
 };
-
-console.log(makeSine(400/44100,44100));
-buildFile('SINETEST.wav',[makeSine(400/44100,44100)]);
