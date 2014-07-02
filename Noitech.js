@@ -26,7 +26,7 @@ var makeSaw=function(tone,duration,harmonicCount,amplitude,enharmonicity,harmoni
 		}
 		else{
 			if (harmonic > 1){
-				return (1-(Math.pow(moment/Math.pow(Math.pow(moment,2)+1,0.5),1/harmonic)));
+				return (1-(Math.pow(moment/Math.pow(Math.pow(moment,2)+1,0.5),harmonicDecay/harmonic)));
 			}
 			else{
 				return ((moment)/(Math.pow(Math.pow(moment,2)+1,0.5)));
@@ -301,4 +301,4 @@ var buildFile = function(fileName,channels){
 
 };
 
-buildFile('SINETEST.wav',[makeSaw(400/44100,44100*20,30,0.5,0.0005,20000000)]);
+buildFile('SINETEST.wav',[makeSaw(400/44100,44100*20,30,0.5,0.0005,2000000000)]);
