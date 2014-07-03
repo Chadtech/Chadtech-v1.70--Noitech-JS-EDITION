@@ -158,14 +158,15 @@ var padAfter = function(durRay,paddingAmount){
 	for (var padding = 0; padding<paddingAmount; padding++){
 		outRay.push(0);
 	}
-	outRay=durRay.concat(outRay);	
+	outRay=durRay.concat(outRay);
+	return outRay;	
 };
 
 var substitute = function(durRay,canvasRay,whereAt,level,substitutionLevel){
 	var outRay=[];
 	var whereAt = typeof whereAt == 'undefined' ? 0:whereAt;
 	var level = typeof level == 'undefined' ? 1:level;
-	var substitutionLevel = typeof substititionLevel == 'undefined' ? 0.1:substitionLevel;
+	var substitutionLevel = typeof substititionLevel == 'undefined' ? 0.1:substitutionLevel;
 	for (var sample = 0; sample<canvasRay.length; sample++){
 		outRay.push(canvasRay[sample]);
 	}
@@ -173,7 +174,8 @@ var substitute = function(durRay,canvasRay,whereAt,level,substitutionLevel){
 		outRay[sample+whereAt]*=substitutionLevel;
 		outRay[sample+whereAt]+=durRay[sample]*level;
 	}
-}
+	return outRay;
+};
 
 var invert = function(durRay){
 	var outRay = [];
@@ -324,4 +326,4 @@ var buildFile = function(fileName,channels){
 
 };
 
-buildFile('mergeTEST.wav',[merge(makeSaw(400/4410,44100,30,0.4),openWave('MCRide_metadataclean.wav')[0])]);
+buildFile('mergeTEST.wav',[substitute(makeSaw(400/4410,44100,30,0.2),openWave('MCRide_metadataclean.wav')[0])]);
