@@ -129,12 +129,36 @@ var merge = function(durRay,canvasRay,whereAt,level){
 	var outRay = [];
 	var whereAt = typeof whereAt == 'undefined' ? 0:whereAt;
 	var level = typeof level == 'undefined' ? 1:level;
+	console.log('LENGTH',canvasRay.length);
 	for (var sample = 0; sample<canvasRay.length; sample++){
 		outRay.push(canvasRay[sample]);
-	};
+	}
+	if ((whereAt+durRay.length)>canvasRay.length){
+		for (var padding = 0; padding<((whereAt+durRay.length)-canvasRay.length); padding++){
+			outRay.push(0);
+		}
+	}
 	for (var sample = 0; sample<durRay.length; sample++){
 		outRay[whereAt+sample]+=durRay[sample]*level;
 	}
+	return outRay;
+};
+
+var padBefore = function(durRay,paddingAmount){
+	var outRay=[];
+	for (var padding = 0; padding<paddingAmount; padding++){
+		outRay.push(0);
+	}
+	outRay=outRay.concat(durRay);
+	return outRay;
+};
+
+var padAfter = function(durRay,paddingAmount){
+	var outRay=[];
+	for (var padding = 0; padding<paddingAmount; padding++){
+		outRay.push(0);
+	}
+	outRay=durRay.concat(outRay);	
 };
 
 var substitute = function(durRay,canvasRay,whereAt,level,substitutionLevel){
@@ -300,4 +324,4 @@ var buildFile = function(fileName,channels){
 
 };
 
-buildFile('TRIANGLETEST.wav',[makeSquare(400/44100,44100*20,60,0.7)]);
+buildFile('mergeTEST.wav',[merge(makeSaw(400/4410,44100,30,0.4),openWave('MCRide_metadataclean.wav')[0])]);
