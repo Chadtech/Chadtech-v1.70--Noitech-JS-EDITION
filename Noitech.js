@@ -299,44 +299,46 @@ var reverse=function(durRay){
 };
 
 // Math functions
-var changeSpeed = function(durRay,speedChange){
-	var outRay=[];
-	var multiply = 1;
-	var divide = 1;
-	var factorize = function(fraction){
-		var numeratorsFactors = [];
-		var denominatorsFactors =[];
-		var isInteger = function(number){
-			if (number%1 === 0){
-				return true;
-			}
-			else{
-				return false;
-			}
-		};
-		for (var denominatorCandidate=1; !isInteger(fraction*denominatorCandidate); denominatorCandidate++){}
-		var denominator=denominatorCandidate;
-		var numerator=fraction*denominator;
 
-		for (var factoringCandidate=2; factoringCandidate<denominator; factoringCandidate++){
-			if(isInteger(denominator/factoringCandidate)){
-				denominator/=factoringCandidate;
-				denominatorsFactors.push(factoringCandidate);
-				factoringCandidate-=1;
-			}
+var factorize = function(fraction){
+	var numeratorsFactors = [];
+	var denominatorsFactors =[];
+	var isInteger = function(number){
+		if (number%1 === 0){
+			return true;
 		}
-
-		for (var factoringCandidate=2; factoringCandidate<numerator; factoringCandidate++){
-			if(isInteger(numerator/factoringCandidate)){
-				numerator/=factoringCandidate;
-				numeratorsFactors.push(factoringCandidate);
-				factoringCandidate-=1;
-			}
+		else{
+			return false;
 		}
-		return [numeratorsFactors,denominatorsFactors];
 	};
-	// WORK IN PROGRESS
+	for (var denominatorCandidate=1; !isInteger(fraction*denominatorCandidate); denominatorCandidate++){}
+	var denominator=denominatorCandidate;
+	var numerator=fraction*denominator;
+
+	var factoringCandidate=2;
+	while (factoringCandidate<=denominator){
+		if(isInteger(denominator/factoringCandidate)){
+			denominator/=factoringCandidate;
+			denominatorsFactors.push(factoringCandidate);
+		}
+		else{
+			factoringCandidate++;
+		}
+	}
+
+	var factoringCandidate=2;
+	while (factoringCandidate<=numerator){
+		if(isInteger(numerator/factoringCandidate)){
+			numerator/=factoringCandidate;
+			numeratorsFactors.push(factoringCandidate);
+		}
+		else{
+			factoringCandidate++;
+		}
+	}
+	return [numeratorsFactors,denominatorsFactors];
 };
+
 
 // System Functions
 
@@ -460,4 +462,6 @@ var buildFile = function(fileName,channels){
 
 };
 
-buildFile('mergeTEST.wav',[reverse(openWave('MCRide_metadataclean.wav')[0])]);
+console.log(factorize((8/7)));
+
+//buildFile('mergeTEST.wav',[reverse(openWave('MCRide_metadataclean.wav')[0])]);
