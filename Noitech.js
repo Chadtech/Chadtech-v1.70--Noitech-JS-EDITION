@@ -300,6 +300,47 @@ var reverse=function(durRay){
 
 // Math functions
 
+var multiplySpeed = function(durRay,factorIncrease){
+	var outRay=[];
+	for (var interval = 0; interval<(Math.floor(durRay.length)/factorIncrease); interval++){
+		var averageValue = 0;
+		for (var sample = 0; sample<factorIncrease; sample++){
+			averageValue+=durRay[sample+(interval*factorIncrease)];
+		}
+		averageValue/=factorIncrease;
+		outRay.push(averageValue);
+	}
+	if ((durRay/factorIncrease)%1 !== 0){
+		var amountOfEndSamples = durRay.length - (Math.floor(durRay.length/factorIncrease)*factorIncrease);
+		if (!(amountOfEndSamples<(factorIncrease/2))){
+			var averageValue = 0;
+			for (var sample = 0; sample <amountOfEndSamples; sample++){
+				averageValue+=durRay[durRay.length-1-sample];
+			}
+			averageValue/=amountOfEndSamples;
+			outRay.push(averageValue);
+		}
+	}
+	return outRay;
+};
+
+var divideSpeed = function(durRay,factorDecrease){
+	var outRay=[];
+	for (var sample = 0; sample<(durRay.length-1); sample++){
+		outRay.push(durRay[sample]);
+		var distanceToNextSample = (durRay[sample+1]-durRay[sample]);
+		var distanceStep = distanceToNextSample/factorDecrease;
+		for (var fillIn = 1; fillIn<factorDecrease; fillIn++){
+			outRay.push(durRay[sample]+Math.round(fillIn*distanceStep));
+		}
+	}
+	for (var fillIn = 1; fillIn<factorDecrease; fillIn++){
+		outRay.push(durRay[durRay.length-1]);
+	};
+	return outRay;
+
+};
+
 var factorize = function(fraction){
 	var numeratorsFactors = [];
 	var denominatorsFactors =[];
@@ -462,6 +503,6 @@ var buildFile = function(fileName,channels){
 
 };
 
-console.log(factorize((8/7)));
 
-//buildFile('mergeTEST.wav',[reverse(openWave('MCRide_metadataclean.wav')[0])]);
+
+buildFile('mergeTEST.wav',[divideSpeed(openWave('MCRide_metadataclean.wav')[0],2)]);
