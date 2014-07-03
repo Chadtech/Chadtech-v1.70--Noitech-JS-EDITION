@@ -42,15 +42,12 @@ var makeSaw=function(tone,duration,harmonicCount,amplitude,enharmonicity,harmoni
 			outRay[moment]+=decay(harmonicDecay,harmonic,moment)*amplitude*(Math.pow(-1,harmonic)/harmonic)*(Math.sin(moment*Math.PI*2*tone*harmonic*enharmonify(enharmonicity,harmonic)));
 		}
 	}
-	if (harmonicDecay){
-		var	numerator = 2*(harmonicCount-1);
-		var	denominator = Math.PI*Math.pow(Math.pow(harmonicCount-1,2)+1,0.5);
-		for (var sample = 0; sample<outRay.length; sample++){
-			outRay[sample]*=(1-(numerator/denominator));
-		}
+	var	numerator = 2*(harmonicCount-1);
+	var	denominator = Math.PI*Math.pow(Math.pow(harmonicCount-1,2)+1,0.5);
+	for (var sample = 0; sample<outRay.length; sample++){
+		outRay[sample]*=(1-(numerator/denominator));
 	}
-
-	return outRay;
+		return outRay;
 };
 
 var makeTriangle =function(tone,duration,harmonicCount,amplitude,enharmonicity,harmonicDecay){
@@ -61,7 +58,6 @@ var makeTriangle =function(tone,duration,harmonicCount,amplitude,enharmonicity,h
 	};
 	var decay = function(harmonicDecay,harmonic,moment){
 		if (typeof harmonicDecay == 'undefined'){
-			console.log('GOT HERE', harmonicDecay,enharmonicity);
 			return 1;
 		}
 		else{
@@ -77,17 +73,16 @@ var makeTriangle =function(tone,duration,harmonicCount,amplitude,enharmonicity,h
 	for (var moment =0; moment<duration ; moment++){
 		outRay.push(0);
 	}
-	for (var harmonic=1; harmonic<=harmonicCount; harmonic++){
+	console.log(harmonicCount);
+	for (var harmonic=0; harmonic<harmonicCount; harmonic++){
 		for (var moment =0; moment<outRay.length ; moment++){
-			outRay[moment]+=decay(harmonicDecay,harmonic,moment)*(amplitude/Math.pow((harmonic*2)+1,2))*Math.pow(-1,harmonic)*Math.sin(moment*Math.PI*2*tone*Math.pow((harmonic*2)+1,2)*enharmonify(enharmonicity,harmonic));
+			outRay[moment]+=decay(harmonicDecay,harmonic,moment)*amplitude*Math.pow(-1,harmonic)*Math.sin(moment*Math.PI*2*tone*((harmonic*2)+1)*enharmonify(enharmonicity,harmonic))/Math.pow((harmonic*2)+1,2);
 		}
 	}
-	if (harmonicDecay){
-		var	numerator = 8*(harmonicCount-1);
-		var	denominator = (Math.pow(Math.PI),2)*Math.pow(Math.pow(harmonicCount-1,2)+1,0.5);
-		for (var sample = 0; sample<outRay.length; sample++){
-			outRay[sample]*=(1-(numerator/denominator));
-		}
+	var	numerator = 8*(harmonicCount-1);
+	var	denominator = (Math.pow(Math.PI,2)*Math.pow(Math.pow(harmonicCount-1,2)+1,0.5));
+	for (var sample = 0; sample<outRay.length; sample++){
+		outRay[sample]*=(1-(numerator/denominator));
 	}
 	return outRay;
 };
@@ -312,4 +307,4 @@ var buildFile = function(fileName,channels){
 
 };
 
-buildFile('TRIANGLETEST.wav',[makeTriangle(400/44100,44100*20,30)]);
+buildFile('TRIANGLETEST.wav',[makeTriangle(400/44100,44100*20,60,0.7)]);
