@@ -123,45 +123,33 @@ var makeSquare = function(tone,duration,harmonicCount,amplitude,enharmonicity,ha
 	return outRay;
 };
 
-var additiveSynth = function(tone,harmonics,duration){ // Harmonics are arrays such that [ harmonic, phase, volume, decay rate ]
-	var outRay = [];
-	var amplitude = 32767 || amplitude;
-	var decay = function(harmonicDecay,harmonic,moment){
-		if (typeof harmonicDecay == 'undefined'){
-			return 1;
-		}
-		else{
-			if (harmonic > 1){
-				return (harmonicDecay/((harmonicDecay/20)+(moment*harmonic)));
-			}
-			else{
-				return (1-(harmonicDecay/((harmonicDecay/20)+(moment*harmonic))));
-			}
-		}
-	};
-	for (var moment = 0; moment<duration; moment++){
-		outRay.push(0);
-	}
-	for (var component = 0; component<harmonics.length; component++){
-		for (moment = 0; moment<duration; moment++){
-			outRay+=Math.sin((Math.PI*2*moment*harmonics[component][0])+(harmonics[component][1]))*harmonics[component][2]*amplitude*decay(harmonics[component][3],1,moment);
-		}
-	}
-};
-
 // Array manipulation functions
 
 var merge = function(durRay,canvasRay,whereAt,level){
 	var outRay = [];
-	whereAt = typeof whereAt == 'undefined' ? 0:whereAt;
-	level = typeof level == 'undefined' ? 1000:level;
+	var whereAt = typeof whereAt == 'undefined' ? 0:whereAt;
+	var level = typeof level == 'undefined' ? 1:level;
 	for (var sample = 0; sample<canvasRay.length; sample++){
 		outRay.push(canvasRay[sample]);
 	};
 	for (var sample = 0; sample<durRay.length; sample++){
-		outRay[whereAt+sample]+=durRay[sample];
+		outRay[whereAt+sample]+=durRay[sample]*level;
 	}
 };
+
+var substitute = function(durRay,canvasRay,whereAt,level,substitutionLevel){
+	var outRay=[];
+	var whereAt = typeof whereAt == 'undefined' ? 0:whereAt;
+	var level = typeof level == 'undefined' ? 1:level;
+	var substitutionLevel = typeof substititionLevel == 'undefined' ? 0.1:substitionLevel;
+	for (var sample = 0; sample<canvasRay.length; sample++){
+		outRay.push(canvasRay[sample]);
+	}
+	for (var sample = 0; sample<durRay.length; sample++){
+		outRay[sample+whereAt]*=substitutionLevel;
+		outRay[sample+whereAt]+=durRay[sample]*level;
+	}
+}
 
 var invert = function(durRay){
 	var outRay = [];
