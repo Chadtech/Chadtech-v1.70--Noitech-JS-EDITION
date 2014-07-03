@@ -123,6 +123,14 @@ var makeSquare = function(tone,duration,harmonicCount,amplitude,enharmonicity,ha
 	return outRay;
 };
 
+var makeSilence = function(duration){
+	outRay=[];
+	for (moment =0; moment<duration; moment++){
+		outRay.push(0);
+	}
+	return outRay;
+}
+
 // Array manipulation functions
 
 var merge = function(durRay,canvasRay,whereAt,level){
@@ -142,24 +150,6 @@ var merge = function(durRay,canvasRay,whereAt,level){
 		outRay[whereAt+sample]+=durRay[sample]*level;
 	}
 	return outRay;
-};
-
-var padBefore = function(durRay,paddingAmount){
-	var outRay=[];
-	for (var padding = 0; padding<paddingAmount; padding++){
-		outRay.push(0);
-	}
-	outRay=outRay.concat(durRay);
-	return outRay;
-};
-
-var padAfter = function(durRay,paddingAmount){
-	var outRay=[];
-	for (var padding = 0; padding<paddingAmount; padding++){
-		outRay.push(0);
-	}
-	outRay=durRay.concat(outRay);
-	return outRay;	
 };
 
 var substitute = function(durRay,canvasRay,whereAt,level,substitutionLevel){
@@ -185,7 +175,24 @@ var invert = function(durRay){
 	return outRay;
 };
 
-// This one I just made up. Hopefully itll work. 
+var padBefore = function(durRay,paddingAmount){
+	var outRay=[];
+	for (var padding = 0; padding<paddingAmount; padding++){
+		outRay.push(0);
+	}
+	outRay=outRay.concat(durRay);
+	return outRay;
+};
+
+var padAfter = function(durRay,paddingAmount){
+	var outRay=[];
+	for (var padding = 0; padding<paddingAmount; padding++){
+		outRay.push(0);
+	}
+	outRay=durRay.concat(outRay);
+	return outRay;	
+};
+
 var quietReducer = function(durRay,degree,amplitude){
 	var amplitude = amplitude*32767 || 32767;
 	var outRay =[];
@@ -199,6 +206,67 @@ var quietReducer = function(durRay,degree,amplitude){
 		else{
 			outRay[moment]=durRay[moment]*Math.pow(((durRay[moment]/amplitude)*(-1)),(1+degree));
 		}
+	}
+	return outRay;
+};
+
+var delay = function(durRay,howMany,space,decay){
+	var outRay=[];
+	for (var moment = 0; moment<(durRay.length+(howMany*space)); moment++){
+		outRay.push(0);
+	}
+	for (var sample = 0; sample<durRay.length; sample++){
+		for (var iteration = 0; iteration<howMany; iteration++){
+			outRay+=durRay[sample+(iteration*space)]*Math.pow(decay,iteration);
+		}
+	}
+	return outRay;
+};
+
+var adjustAmplitudeResolution = function(durRay,extent){
+	var outRay=[];
+	for (var sample = 0; sample < durRay.length; sample++){
+		outRay.push(Math.round(durRay[sample]/extent)*extent);
+	}
+};
+
+var clip = function(durRay,threshold){
+	var threshold = threshold * 32767;
+	var outRay=[];
+	for (var sample = 0; sample<durRay.length; sample++){
+		if (durRay[sample]>threshold){
+			outRay.push(Math.floor(threshold));
+		}
+		else{
+			outRay.push(durRay[sample]);
+		}
+	}
+	return outRay;
+};
+
+var volumeReduce =function(durRay,level){
+	var level = level*32767;
+	var outRay = [];
+	for (var sample = 0; sample<durRay.length; sample++){
+		outRay.push(Math.round(durRay[sample]*level));
+	}
+	return outRay;
+};
+
+var fadeOut=function(durRay,whereBegin,whereEnd,endVolume){
+	var whereBegin = whereBegin || 0;
+	var whereEnd = whereEnd || durRay.length-1;
+	var endVolume = endVolume || 0;
+	var outRay=[];
+	var rateOfReduction = (1-endVolume)/(whereEnd-whereBegin);
+	for (var sample = 0; sample<whereBegin; sample++){
+		outRay.push(durRay[sample]);
+	}
+	for (var sample = 0; sample<(whereEnd-whereBegin); sample++){
+		outRay.push(Math.round(durRay[sample]*(1-(sample*rateOfReduction))));
+	}
+	for (var sample = 0; sample<(durRay.length-whereEnd-1); sample++){
+		outRay.push(Math.round(durRay[sample]*endVolume));
 	}
 	return outRay;
 };
