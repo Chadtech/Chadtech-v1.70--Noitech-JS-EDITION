@@ -187,7 +187,7 @@ var invert = function(durRay){
 
 // This one I just made up. Hopefully itll work. 
 var quietReducer = function(durRay,degree,amplitude){
-	var amplitude = amplitude || 32767;
+	var amplitude = amplitude*32767 || 32767;
 	var outRay =[];
 	for (var moment = 0; moment<durRay.length; moment++){
 		outRay.push(0);
@@ -197,11 +197,10 @@ var quietReducer = function(durRay,degree,amplitude){
 			outRay[moment]=durRay[moment]*Math.pow((durRay[moment]/amplitude),(1+degree));	
 		}
 		else{
-			outRay[moment]=durRay[moment]*(-1)*Math.pow((durRay[moment]/amplitude),(1+degree));
+			outRay[moment]=durRay[moment]*Math.pow(((durRay[moment]/amplitude)*(-1)),(1+degree));
 		}
 	}
 	return outRay;
-
 };
 
 // System Functions
@@ -326,4 +325,4 @@ var buildFile = function(fileName,channels){
 
 };
 
-buildFile('mergeTEST.wav',[substitute(makeSaw(400/4410,44100,30,0.2),openWave('MCRide_metadataclean.wav')[0])]);
+buildFile('mergeTEST.wav',[quietReducer(openWave('MCRide_metadataclean.wav')[0],0.5)]);
