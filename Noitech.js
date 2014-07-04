@@ -124,12 +124,12 @@ var makeSquare = function(tone,duration,harmonicCount,amplitude,enharmonicity,ha
 };
 
 var makeSilence = function(duration){
-	outRay=[];
-	for (moment =0; moment<duration; moment++){
+	var outRay=[];
+	for (var moment =0; moment<duration; moment++){
 		outRay.push(0);
 	}
 	return outRay;
-}
+};
 
 // Array manipulation functions
 
@@ -298,12 +298,51 @@ var reverse=function(durRay){
 	return outRay;
 };
 
-// Math functions
-
 var changeSpeed = function(durRay,change){
 	var outRay=[];
 	var changes = factorize(change);
 	var increases = 0;
+
+	var multiplySpeed = function(durRay,factorIncrease){
+		var outRay=[];
+		for (var interval = 0; interval<(Math.floor(durRay.length)/factorIncrease); interval++){
+			var averageValue = 0;
+			for (var sample = 0; sample<factorIncrease; sample++){
+				averageValue+=durRay[sample+(interval*factorIncrease)];
+			}
+			averageValue/=factorIncrease;
+			outRay.push(averageValue);
+		}
+		if ((durRay/factorIncrease)%1 !== 0){
+			var amountOfEndSamples = durRay.length - (Math.floor(durRay.length/factorIncrease)*factorIncrease);
+			if (!(amountOfEndSamples<(factorIncrease/2))){
+				var averageValue = 0;
+				for (var sample = 0; sample <amountOfEndSamples; sample++){
+					averageValue+=durRay[durRay.length-1-sample];
+				}
+				averageValue/=amountOfEndSamples;
+				outRay.push(averageValue);
+			}
+		}
+		return outRay;
+	};
+
+	var divideSpeed = function(durRay,factorDecrease){
+		var outRay=[];
+		for (var sample = 0; sample<(durRay.length-1); sample++){
+			outRay.push(durRay[sample]);
+			var distanceToNextSample = (durRay[sample+1]-durRay[sample]);
+			var distanceStep = distanceToNextSample/factorDecrease;
+			for (var fillIn = 1; fillIn<factorDecrease; fillIn++){
+				outRay.push(durRay[sample]+Math.round(fillIn*distanceStep));
+			}
+		}
+		for (var fillIn = 1; fillIn<factorDecrease; fillIn++){
+			outRay.push(durRay[durRay.length-1]);
+		};
+		return outRay;
+	};
+
 	for (var sample = 0; sample<durRay.length; sample++){
 		outRay.push(durRay[sample]);		
 	}
@@ -314,48 +353,9 @@ var changeSpeed = function(durRay,change){
 		outRay=multiplySpeed(outRay,changes[0][increase]);
 	}
 	return outRay;
-}
-
-var multiplySpeed = function(durRay,factorIncrease){
-	var outRay=[];
-	for (var interval = 0; interval<(Math.floor(durRay.length)/factorIncrease); interval++){
-		var averageValue = 0;
-		for (var sample = 0; sample<factorIncrease; sample++){
-			averageValue+=durRay[sample+(interval*factorIncrease)];
-		}
-		averageValue/=factorIncrease;
-		outRay.push(averageValue);
-	}
-	if ((durRay/factorIncrease)%1 !== 0){
-		var amountOfEndSamples = durRay.length - (Math.floor(durRay.length/factorIncrease)*factorIncrease);
-		if (!(amountOfEndSamples<(factorIncrease/2))){
-			var averageValue = 0;
-			for (var sample = 0; sample <amountOfEndSamples; sample++){
-				averageValue+=durRay[durRay.length-1-sample];
-			}
-			averageValue/=amountOfEndSamples;
-			outRay.push(averageValue);
-		}
-	}
-	return outRay;
 };
 
-var divideSpeed = function(durRay,factorDecrease){
-	var outRay=[];
-	for (var sample = 0; sample<(durRay.length-1); sample++){
-		outRay.push(durRay[sample]);
-		var distanceToNextSample = (durRay[sample+1]-durRay[sample]);
-		var distanceStep = distanceToNextSample/factorDecrease;
-		for (var fillIn = 1; fillIn<factorDecrease; fillIn++){
-			outRay.push(durRay[sample]+Math.round(fillIn*distanceStep));
-		}
-	}
-	for (var fillIn = 1; fillIn<factorDecrease; fillIn++){
-		outRay.push(durRay[durRay.length-1]);
-	};
-	return outRay;
-
-};
+// Math functions
 
 var factorize = function(fraction){
 	var numeratorsFactors = [];
@@ -519,7 +519,4 @@ var buildFile = function(fileName,channels){
 
 };
 
-
-
-buildFile('strictIncreaseTEST.wav',[multiplySpeed(openWave('MCRide_metadataclean.wav')[0],2)]);
 buildFile('partiaIncreaseTEST.wav',[changeSpeed(openWave('MCRide_metadataclean.wav')[0],1.5)]);
