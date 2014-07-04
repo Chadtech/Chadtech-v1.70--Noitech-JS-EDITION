@@ -217,7 +217,7 @@ var delay = function(durRay,howMany,space,decay){
 	}
 	for (var sample = 0; sample<durRay.length; sample++){
 		for (var iteration = 0; iteration<howMany; iteration++){
-			outRay+=durRay[sample+(iteration*space)]*Math.pow(decay,iteration);
+			outRay[sample]+=durRay[sample+(iteration*space)]*Math.pow(decay,iteration);
 		}
 	}
 	return outRay;
@@ -244,11 +244,10 @@ var clip = function(durRay,threshold){
 	return outRay;
 };
 
-var volumeReduce =function(durRay,level){
-	var level = level*32767;
+var volumeChange = function(durRay,level){
 	var outRay = [];
 	for (var sample = 0; sample<durRay.length; sample++){
-		outRay.push(Math.round(durRay[sample]*level));
+		outRay.push(durRay[sample]*level);
 	}
 	return outRay;
 };
@@ -519,4 +518,4 @@ var buildFile = function(fileName,channels){
 
 };
 
-buildFile('partiaIncreaseTEST.wav',[changeSpeed(openWave('MCRide_metadataclean.wav')[0],1.5)]);
+buildFile('partiaIncreaseTEST.wav',[volumeChange(delay(openWave('MCRide_metadataclean.wav')[0],7,500,0.9),0.2)]);
