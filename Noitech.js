@@ -354,6 +354,28 @@ var changeSpeed = function(durRay,change){
 	return outRay;
 };
 
+var shiftSamples = function(durRay,shift){ // Shift is a number between -1 and 1.
+	var outRay = [];
+	var wipRay = [];
+	if (shift===0 || shift=='undefined'){
+		return durRay;
+	}
+	for (var sample = 0; sample<durRay.length; sample++){
+		wipRay.push(durRay[sample]);
+	}
+	if (shift > 0){
+		wipRay = [0].concat(wipRay);
+	}
+	else{
+		wipRay = wipRay.concat([0]);
+	}
+	var shiftMag = Math.abs(shift)
+	for (var sample = 0; sample<durRay.length; sample++){
+		outRay.push((wipRay[sample]*(1-shiftMag))+(wipRay[sample]*shiftMag));
+	}
+	return outRay;
+};
+
 // Math functions
 
 var factorize = function(fraction){
@@ -394,7 +416,6 @@ var factorize = function(fraction){
 	}
 	return [numeratorsFactors,denominatorsFactors];
 };
-
 
 // System Functions
 
@@ -518,4 +539,4 @@ var buildFile = function(fileName,channels){
 
 };
 
-buildFile('partiaIncreaseTEST.wav',[volumeChange(delay(openWave('MCRide_metadataclean.wav')[0],7,500,0.9),0.2)]);
+buildFile('partiaIncreaseTEST.wav',[shiftSamples(openWave('MCRide_metadataclean.wav')[0],0.5)]);
