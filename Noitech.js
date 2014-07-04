@@ -300,6 +300,22 @@ var reverse=function(durRay){
 
 // Math functions
 
+var changeSpeed = function(durRay,change){
+	var outRay=[];
+	var changes = factorize(change);
+	var increases = 0;
+	for (var sample = 0; sample<durRay.length; sample++){
+		outRay.push(durRay[sample]);		
+	}
+	for (var decrease = 0; decrease<changes[1].length; decrease++){
+		outRay=divideSpeed(outRay,changes[1][decrease]);
+	}
+	for (var increase = 0; increase<changes[0].length; increase++){
+		outRay=multiplySpeed(outRay,changes[0][increase]);
+	}
+	return outRay;
+}
+
 var multiplySpeed = function(durRay,factorIncrease){
 	var outRay=[];
 	for (var interval = 0; interval<(Math.floor(durRay.length)/factorIncrease); interval++){
@@ -505,4 +521,5 @@ var buildFile = function(fileName,channels){
 
 
 
-buildFile('mergeTEST.wav',[divideSpeed(openWave('MCRide_metadataclean.wav')[0],2)]);
+buildFile('strictIncreaseTEST.wav',[multiplySpeed(openWave('MCRide_metadataclean.wav')[0],2)]);
+buildFile('partiaIncreaseTEST.wav',[changeSpeed(openWave('MCRide_metadataclean.wav')[0],1.5)]);
