@@ -316,7 +316,7 @@ var changeSpeed = function(durRay,change){
 			var amountOfEndSamples = durRay.length - (Math.floor(durRay.length/factorIncrease)*factorIncrease);
 			if (!(amountOfEndSamples<(factorIncrease/2))){
 				var averageValue = 0;
-				for (var sample = 0; sample <amountOfEndSamples; sample++){
+				for (var sample = 0; sample<amountOfEndSamples; sample++){
 					averageValue+=durRay[durRay.length-1-sample];
 				}
 				averageValue/=amountOfEndSamples;
@@ -461,6 +461,54 @@ var declip = function(durRay,margin){
 		var margin = margin || 30;		
 	}
 	return fadeIn(fadeOut(durRay,durRay.length-margin),0,margin);
+};
+
+var grainSynth = function(durRay,freqInc,grainLength,grainRate,fade){
+	var fade = fade || true;
+	var grains = [];
+	var sampleSpot=0;
+	while (sampleSpot<durRay.length){
+		var startingSample = Math.floor(sampleSpot);
+		var sampleModulus = sampleSpot%1;
+		var thisGrainLength = 0;
+		grains.push([]);
+		if ((durRay.length-sampleSpot)>grainLength){
+			thisGrainLength=grainLength;
+		}
+		else{
+			thisGrainLength=durRay.length-sampleSpot;
+		}
+		for (var grainSample = 0; grainSample<thisGrainLength; grainSample++){
+			grains[grains.length-1].push(shiftSamples(durRay[sampleSpot+grainSample],sampleModulus));
+		}
+		sampleSpot+=grainRate;
+	}
+	if (fade){
+		for (var grain = 0; grain<grains.length; grain++){
+			grains[grain]=changeSpeed(grains[grain],freqInc);
+			if (grains[grain].length>30){
+				grains[grain]=fadeIn(fadeOut(grains[grain],grains[grain].length-30),0,30);
+			}
+			else{
+				grains[grain]=fadeIn(fadeOut(grains[grain]));
+			}
+		}
+	}
+	else{
+		for (var grain = 0; grain<grains.length; grain++){
+			grains[grain]=changeSpeed(grains[grain],freqInc);
+		}
+	}
+	var outRay = [];
+	for (var time = 0; time<durRay.length; time++){
+		outRay.push(0);
+	}
+	for (var grainIndex = 0; grainIndex<grains.length; grainIndex++){
+		for (var moment = 0; moment<grains[grainIndex].length; moment++){
+			outRay[moment+Math.floor(grainIndex*grainRate)]+=grains[grainIndex][moment];
+		}
+	}
+	return outRay;
 };
 
 // Math functions
