@@ -443,6 +443,19 @@ var reverb = function(durRay,decayZE,decayON,delaysZE,delaysON){
 	return reverbForwardPass(reverbBackPass(durRay,decayZE,delaysZE),decayON,delaysON);
 };
 
+var convolve = function(durRay,convoluteSeed,level){
+	var outRay = 0;
+	for (var time = 0; time<(durRay.length+convoluteSeed.length); time++){
+		outRay.push(0);
+	}
+	for (var sample = 0; sample<durRay.length; sample++){
+		for (var convolveSample = 0; convolveSample<convoluteSeed.length; convolveSample++){
+			outRay[sample+convolveSample]+=durRay[sample]*(convoluteSeed[convolveSample]/32767)*level;
+		}
+	}
+	return outRay;
+};
+
 // Math functions
 
 var factorize = function(fraction){
