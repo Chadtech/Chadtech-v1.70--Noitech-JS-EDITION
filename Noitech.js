@@ -444,7 +444,8 @@ var reverb = function(durRay,decayZE,decayON,delaysZE,delaysON){
 };
 
 var convolve = function(durRay,convoluteSeed,level){
-	var outRay = 0;
+	var level = level || 0.05;
+	var outRay = [];
 	for (var time = 0; time<(durRay.length+convoluteSeed.length); time++){
 		outRay.push(0);
 	}
@@ -674,4 +675,4 @@ var buildFile = function(fileName,channels){
 
 };
 
-buildFile('partiaIncreaseTEST.wav',[reverb(openWave('MCRide_metadataclean.wav')[0],0.5,0.5)]);
+buildFile('partiaIncreaseTEST.wav',[convolve(openWave('MCRide_metadataclean.wav')[0],openWave('gammage_convolution.wav')[0],0.05)]);
