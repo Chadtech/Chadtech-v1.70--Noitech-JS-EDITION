@@ -338,7 +338,7 @@ var changeSpeed = function(durRay,change){
 		}
 		for (var fillIn = 1; fillIn<factorDecrease; fillIn++){
 			outRay.push(durRay[durRay.length-1]);
-		};
+		}
 		return outRay;
 	};
 
@@ -369,7 +369,7 @@ var shiftSamples = function(durRay,shift){ // Shift is a number between -1 and 1
 	else{
 		wipRay = wipRay.concat([0]);
 	}
-	var shiftMag = Math.abs(shift)
+	var shiftMag = Math.abs(shift);
 	for (var sample = 0; sample<durRay.length; sample++){
 		outRay.push((wipRay[sample]*(1-shiftMag))+(wipRay[sample]*shiftMag));
 	}
