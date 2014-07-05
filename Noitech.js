@@ -672,6 +672,3 @@ var buildFile = function(fileName,channels){
 	fs.writeFile(fileName,outputFile);
 
 };
-
-buildFile('graindSINE.wav',[grainSynth(makeSine(400/44100,44100*3,0.05),2,2400,44100/400)]);
-buildFile('plainOSINE.wav',[makeSine(400/44100,44100*3,0.2)]);
