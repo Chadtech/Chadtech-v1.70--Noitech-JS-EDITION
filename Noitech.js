@@ -73,7 +73,6 @@ var makeTriangle =function(tone,duration,harmonicCount,amplitude,enharmonicity,h
 	for (var moment =0; moment<duration ; moment++){
 		outRay.push(0);
 	}
-	console.log(harmonicCount);
 	for (var harmonic=0; harmonic<harmonicCount; harmonic++){
 		for (var moment =0; moment<outRay.length ; moment++){
 			outRay[moment]+=decay(harmonicDecay,harmonic,moment)*amplitude*Math.pow(-1,harmonic)*Math.sin(moment*Math.PI*2*tone*((harmonic*2)+1)*enharmonify(enharmonicity,harmonic))/Math.pow((harmonic*2)+1,2);
@@ -137,7 +136,6 @@ var merge = function(durRay,canvasRay,whereAt,level){
 	var outRay = [];
 	var whereAt = typeof whereAt == 'undefined' ? 0:whereAt;
 	var level = typeof level == 'undefined' ? 1:level;
-	console.log('LENGTH',canvasRay.length);
 	for (var sample = 0; sample<canvasRay.length; sample++){
 		outRay.push(canvasRay[sample]);
 	}
