@@ -376,6 +376,54 @@ var shiftSamples = function(durRay,shift){ // Shift is a number between -1 and 1
 	return outRay;
 };
 
+var cutUpEveryGrain = function(durRay,amplitudeThreshold){
+	var grains = [];
+	var beginning = 0;
+	var ending = 0;
+	for (var moment = 0; moment<durRay.length; moment++){
+		if (durRay[moment]<amplitudeThreshold){
+			ending = moment;
+			grains.push(durRay.slice(beginning,ending));
+			moment = moment;
+		}
+	}
+	return grains;
+};
+
+var reverb = function(durRay,decayZE,decayON,delaysZE,delaysON){
+	var delaysZE = [1115,1188,1356,1277,1422,1491,1617,1557] || delaysZE;
+	var delaysON = [255,556,441,341] || delaysON;
+	var reverbBackPass = function(subRay,decay,delays){
+		var arrayOfDelayeds = [];
+		for (var delay = 0; delay<delays.length; delay++){
+			arraysOfDelayeds.push([]);
+			for (var sample; sample<subRay.length; sample++){
+				arrayOfDelayeds[arrayOfDelayeds.length-1].push(subRay[sample]);
+			}
+		}
+		for (var delay = 0; delay<delays.length; delay++){
+			for (var padding = 0; padding<delays[delay]; padding++){
+				arrayOfDelayeds[delay].push(0);
+			}
+			for (var sample = 0; sample<arrayOfDelayeds[delay].length; sample++){
+				arrayOfDelayeds[delay][sample+delays[delay]]+=arrayOfDelayeds[delay][sample]*decay;
+			}
+		}
+		var backOutRay=[];
+		for (var time = 0; time<Math.max.apply(null,delays); time++){
+			backOutRay.push(0);
+		}
+		for (var delayedArray = 0; delayedArray<arrayOfDelayeds.length; delayedArray++){
+			for (var sample = 0; sample<arrayOfDelayeds[delayedArray].length; sample++){
+				backOutRay[sample]+=arrayOfDelayeds[delayedArray][sample]/arrayOfDelayeds.length;
+			}
+		}
+		for (var sample = 0; sample<subRay.length; sample++){
+			// WORK IN PROGRESS
+		}
+	}
+};
+
 // Math functions
 
 var factorize = function(fraction){
