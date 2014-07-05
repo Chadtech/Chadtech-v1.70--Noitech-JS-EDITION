@@ -456,6 +456,13 @@ var convolve = function(durRay,convoluteSeed,level){
 	return outRay;
 };
 
+var declip = function(durRay,margin){
+	if (durRay.length > 30){
+		var margin = margin || 30;		
+	}
+	return fadeIn(fadeOut(durRay,durRay.length-margin),0,margin);
+};
+
 // Math functions
 
 var factorize = function(fraction){
