@@ -397,14 +397,14 @@ var reverb = function(durRay,decayZE,decayON,delaysZE,delaysON){
 		var arrayOfDelayeds = [];
 		for (var delay = 0; delay<delays.length; delay++){
 			arrayOfDelayeds.push([]);
-			for (var time = 0; time<subRay.length; sample++){
-				arrayOfDelayeds[arrayOfDelayeds.length-1].push(0);
-			}
 			for (var padding = 0; padding<delays[delay]; padding++){
 				arrayOfDelayeds[arrayOfDelayeds.length-1].push(0);
 			}
-			for (var sample = 0; sample<arrayOfDelayeds[delay].length; sample++){
-				arrayOfDelayeds[arrayOfDelayeds.length-1][sample+delays[delay]]+=arrayOfDelayeds[delay][sample]*decay;
+			for (var sample = 0; sample<subRay.length; sample++){
+				arrayOfDelayeds[arrayOfDelayeds.length-1].push(subRay[sample]);
+			}
+			for (var sample = 0; sample<subRay.length; sample++){
+				arrayOfDelayeds[arrayOfDelayeds.length-1][sample]+=arrayOfDelayeds[arrayOfDelayeds.length-1][sample+delays[delay]]*decay;
 			}
 		}
 		var backOutRay=[];
@@ -422,11 +422,11 @@ var reverb = function(durRay,decayZE,decayON,delaysZE,delaysON){
 		var arrayOfUndelayeds = [];
 		for (var undelay = 0; undelay<undelays.length; undelay++){
 			arrayOfUndelayeds.push([]);
-			for (var time = 0; time<(undelays[undelay].length+subRay.length); time++){
+			for (var time = 0; time<(undelays[undelay]+subRay.length); time++){
 				arrayOfUndelayeds[arrayOfUndelayeds.length-1].push(0);
 			}
 			for (var sample = 0; sample<subRay.length; sample++){
-				arrayOfUndelayeds[arrayOfUndelayeds.length-1][sample]+=subRay[sample+undelays[undelay]]*decay;
+				arrayOfUndelayeds[arrayOfUndelayeds.length-1][sample+undelays[undelay]]+=subRay[sample]*decay;
 			}
 		}
 		var forwardOutRay=[];
@@ -674,4 +674,4 @@ var buildFile = function(fileName,channels){
 
 };
 
-buildFile('partiaIncreaseTEST.wav',[shiftSamples(openWave('MCRide_metadataclean.wav')[0],0.5)]);
+buildFile('partiaIncreaseTEST.wav',[reverb(openWave('MCRide_metadataclean.wav')[0],0.5,0.5)]);
