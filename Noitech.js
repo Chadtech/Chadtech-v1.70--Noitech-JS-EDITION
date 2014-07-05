@@ -396,21 +396,19 @@ var reverb = function(durRay,decayZE,decayON,delaysZE,delaysON){
 	var reverbBackPass = function(subRay,decay,delays){
 		var arrayOfDelayeds = [];
 		for (var delay = 0; delay<delays.length; delay++){
-			arraysOfDelayeds.push([]);
-			for (var sample; sample<subRay.length; sample++){
-				arrayOfDelayeds[arrayOfDelayeds.length-1].push(subRay[sample]);
+			arrayOfDelayeds.push([]);
+			for (var time = 0; time<subRay.length; sample++){
+				arrayOfDelayeds[arrayOfDelayeds.length-1].push(0);
 			}
-		}
-		for (var delay = 0; delay<delays.length; delay++){
 			for (var padding = 0; padding<delays[delay]; padding++){
-				arrayOfDelayeds[delay].push(0);
+				arrayOfDelayeds[arrayOfDelayeds.length-1].push(0);
 			}
 			for (var sample = 0; sample<arrayOfDelayeds[delay].length; sample++){
-				arrayOfDelayeds[delay][sample+delays[delay]]+=arrayOfDelayeds[delay][sample]*decay;
+				arrayOfDelayeds[arrayOfDelayeds.length-1][sample+delays[delay]]+=arrayOfDelayeds[delay][sample]*decay;
 			}
 		}
 		var backOutRay=[];
-		for (var time = 0; time<Math.max.apply(null,delays); time++){
+		for (var time = 0; time<(Math.max.apply(null,delays)+subRay.length); time++){
 			backOutRay.push(0);
 		}
 		for (var delayedArray = 0; delayedArray<arrayOfDelayeds.length; delayedArray++){
@@ -418,10 +416,31 @@ var reverb = function(durRay,decayZE,decayON,delaysZE,delaysON){
 				backOutRay[sample]+=arrayOfDelayeds[delayedArray][sample]/arrayOfDelayeds.length;
 			}
 		}
-		for (var sample = 0; sample<subRay.length; sample++){
-			// WORK IN PROGRESS
+		return backOutRay;
+	};
+	var reverbForwardPass = function(subRay,decay,undelays){
+		var arrayOfUndelayeds = [];
+		for (var undelay = 0; undelay<undelays.length; undelay++){
+			arrayOfUndelayeds.push([]);
+			for (var time = 0; time<(undelays[undelay].length+subRay.length); time++){
+				arrayOfUndelayeds[arrayOfUndelayeds.length-1].push(0);
+			}
+			for (var sample = 0; sample<subRay.length; sample++){
+				arrayOfUndelayeds[arrayOfUndelayeds.length-1][sample]+=subRay[sample+undelays[undelay]]*decay;
+			}
 		}
-	}
+		var forwardOutRay=[];
+		for (var time = 0; time<(Math.max.apply(null,undelays)+subRay.length); time++){
+			forwardOutRay.push(0);
+		}
+		for (var undelayedArray =0; undelayedArray<arrayOfUndelayeds.length; undelayedArray++){
+			for (var sample = 0; sample<arrayOfUndelayeds[undelayedArray].length; sample++){
+				forwardOutRay[sample]+=arrayOfUndelayeds[undelayedArray][sample]/undelays.length;
+			}
+		}
+		return forwardOutRay;
+	};
+	return reverbForwardPass(reverbBackPass(durRay,decayZE,delaysZE),decayON,delaysON);
 };
 
 // Math functions
