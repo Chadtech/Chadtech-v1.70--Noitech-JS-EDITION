@@ -6,7 +6,7 @@ var fs = require('fs');
 // Tone Making Functions
 
 var makeSine = function(tone,duration,amplitude){
-	var amplitude = amplitude || 32767;
+	var amplitude = amplitude*32767 || 32767;
 	var outRay = [];
 	for (var sample = 0; sample<duration; sample++){
 		outRay.push(amplitude*Math.sin(Math.PI*2*sample*tone));
@@ -284,7 +284,7 @@ var fadeIn=function(durRay,whereBegin,whereEnd,startVolume){
 		outRay.push(Math.round(durRay[sample]*(1-((changeLength-sample)*rateOfIncrease))));
 	}
 	for (var sample = 0; sample<(durRay.length-whereEnd-1); sample++){
-		outRay.push(durRay[sample]*endVolume);
+		outRay.push(durRay[sample]);
 	}
 	return outRay;
 };
@@ -479,9 +479,7 @@ var grainSynth = function(durRay,freqInc,grainLength,grainRate,fade){
 		else{
 			thisGrainLength=durRay.length-sampleSpot;
 		}
-		for (var grainSample = 0; grainSample<thisGrainLength; grainSample++){
-			grains[grains.length-1].push(shiftSamples(durRay[sampleSpot+grainSample],sampleModulus));
-		}
+		grains.push(shiftSamples(durRay.slice(sampleSpot,sampleSpot+thisGrainLength),sampleModulus));
 		sampleSpot+=grainRate;
 	}
 	if (fade){
@@ -506,7 +504,7 @@ var grainSynth = function(durRay,freqInc,grainLength,grainRate,fade){
 	}
 	for (var grainIndex = 0; grainIndex<grains.length; grainIndex++){
 		for (var moment = 0; moment<grains[grainIndex].length; moment++){
-			outRay[moment+Math.floor(grainIndex*grainRate)]+=grains[grainIndex][moment];
+			outRay[moment+Math.floor((grainIndex/2)*grainRate)]+=grains[grainIndex][moment];
 		}
 	}
 	return outRay;
@@ -675,4 +673,5 @@ var buildFile = function(fileName,channels){
 
 };
 
-buildFile('partiaIncreaseTEST.wav',[convolve(openWave('MCRide_metadataclean.wav')[0],openWave('gammage_convolution.wav')[0],0.05)]);
+buildFile('graindSINE.wav',[grainSynth(makeSine(400/44100,44100*3,0.05),2,2400,44100/400)]);
+buildFile('plainOSINE.wav',[makeSine(400/44100,44100*3,0.2)]);
