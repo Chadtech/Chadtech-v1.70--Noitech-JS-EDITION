@@ -620,7 +620,8 @@ var declip = function(durRay,margin){
 
 // Not all combinations of grainLength, and grainRate will work. Most combinations silence certain
 // frequencies.
-var grainSynthDEFUNKT = function(durRay,freqInc,grainLength,grainRate,fade){
+var grainSynth = function(durRay,freqInc,grainLength,passes,fade){
+	var grainRate = grainLength/passes;
 	var fade = fade || true;
 	var grains = [];
 	var sampleSpot=0;
@@ -642,7 +643,7 @@ var grainSynthDEFUNKT = function(durRay,freqInc,grainLength,grainRate,fade){
 		for (var grain = 0; grain<grains.length; grain++){
 			grains[grain]=changeSpeed(grains[grain],freqInc);
 			if (grains[grain].length>30){
-				grains[grain]=fadeIn(fadeOut(grains[grain],grains[grain].length-30),0,30);
+				grains[grain]=fadeIn(fadeOut(grains[grain]));
 			}
 			else{
 				grains[grain]=fadeIn(fadeOut(grains[grain]));
@@ -665,27 +666,6 @@ var grainSynthDEFUNKT = function(durRay,freqInc,grainLength,grainRate,fade){
 	}
 	return outRay;
 };
-
-//1470
-//735
-var grainSynth = function(durRay,freqInc,grainLength,passes,fade){
-	var fade = fade || true;
-	var grains = [];
-	var freqAdjustedGrainLength = freqInc*grainLength;
-	for (var section = 0; section < Math.floor(durRay.length/grainLength); section++){
-		var grain = [];
-		for (var moment = 0; moment <freqAdjustedGrainLength; moment++){
-			grain.push(durRay[moment+(section*grainLength)]);
-		}
-		grains.push(grain);
-	}
-	var grain = []
-	for (var moment = 0; moment<(durRay.length-(Math.floor(durRay/grainLength)*grainLength)); moment++){
-		grain.push(durRay[moment+(Math.floor(durRay/grainLength)*grainLength)]);
-	}
-	grains.push(grain);
-	/// WIP
-}
 
 // ************************************************************
 // Math functions
@@ -867,5 +847,3 @@ var buildFile = function(fileName,channels){
 	fs.writeFile(fileName,outputFile);
 
 };
-
-buildFile('pianoAt400.wav',[volumeChange(grainSynth(openWave('pianoAt440.wav')[0],10/11,4400,1764),0.1)]);
