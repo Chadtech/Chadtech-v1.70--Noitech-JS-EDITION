@@ -3,8 +3,52 @@
 
 var fs = require('fs');
 
-// Tone Making Functions
+// This is Noitech, a collection of audio generating, manipulating, and saving functions. 
+//The plan is to expand this into a UI, with simular functionality to Audacity, but better suited for music composition.
 
+// All durations are expressed in samples. The sample rate of 44100 is assumed. 
+// Parameters dependent on time measurement and therefore also based in samples. 
+// A tone of 400 hertz, for example, must be given as 400/44100
+
+// All audio segments are arrays of numbers, whos elements correspond to audio samples of an amplitude within the range -32767 and 32767.
+// Arrays can be opened out of wave files with the 'openFile' function, and saved with the 'buildFile' function.
+// Amplitude values over 32767 or under -32767 are saved around the radix of 32767.
+
+
+// ***************************************************
+// Tone Making Functions
+// ***************************************************
+
+// For many of the tone making functions, there are the arguments 'harmonicCount', 'enharmonicity', and 'harmonicDecay'
+// I will explain those below
+
+// *********************
+// harmonicCount
+// Harmonic sounds, are sounds that consist of a tonic tone ( a frequency ) and harmonics ( a frequency that is the tonic tone times an integer )
+// The harmoincCount variable is how many harmonies you want to be generated 'on top' of your tonic tone (the argumnent 'tone')
+// More harmonics mean more computation. I have found 30 to be an adequate value as the harmonicCount argument
+
+// *********************
+// enharmonicity
+// Enharmonicity generally means 'not harmonic', or the content of a sound that is noisy and not a function of the tonic frequency.
+// In my functions, is the degree that the harmonics are imperfect. Physical bodies that produce harmonic sounds (strings, bells, horns)
+// Have a tendency to produce harmonics that are actually a little higher in frequency than the integer multiple of their tonic
+// This is because the vibration actually increases the tension of the body, which increases the frequency for harmonics above that tonic
+
+// The argument 'enharmonicity' should be a very very low number. 0.0007 is my medium value.
+
+// *********************
+// harmonicDecay
+// The argument harmonicDecay contributes a feature to my functions that is also based off a physical phenomenon of sound.
+// Many physical bodies that produce harmonic sounds, tend to begin with very loud high harmonics, and end with volume only in the
+// lower harmonics. The energy in higher frequencies physically expresses itself turbulently and 'decays' into lower frequencies.
+
+// The argument 'harmonic decay' is the rate at which high frequencies lower in volume, and the tonic frequency increases in volume.
+// All the harmonics decay in proportion to how high they are in frequency relative to the tonic frequency.
+
+
+
+// Generates a Sine wave form
 var makeSine = function(tone,duration,amplitude){
 	var amplitude = amplitude*32767 || 32767;
 	var outRay = [];
@@ -14,6 +58,7 @@ var makeSine = function(tone,duration,amplitude){
 	return outRay;
 };
 
+// Generates a Saw Tooth Wave form
 var makeSaw=function(tone,duration,harmonicCount,amplitude,enharmonicity,harmonicDecay){
 	var amplitude = amplitude*32767 || 32767;
 	var enharmonify= function(enharmonicity,harmonic){
@@ -50,6 +95,7 @@ var makeSaw=function(tone,duration,harmonicCount,amplitude,enharmonicity,harmoni
 		return outRay;
 };
 
+// Generates a triangle wave form
 var makeTriangle =function(tone,duration,harmonicCount,amplitude,enharmonicity,harmonicDecay){
 	var amplitude = amplitude*32767 || 32767;
 	var enharmonify= function(enharmonicity,harmonic){
@@ -86,6 +132,7 @@ var makeTriangle =function(tone,duration,harmonicCount,amplitude,enharmonicity,h
 	return outRay;
 };
 
+// Generates a square wave form
 var makeSquare = function(tone,duration,harmonicCount,amplitude,enharmonicity,harmonicDecay){
 	var amplitude = amplitude*32767 || 32767;
 	var enharmonify = function(enharmonicity,harmonic){
@@ -122,6 +169,7 @@ var makeSquare = function(tone,duration,harmonicCount,amplitude,enharmonicity,ha
 	return outRay;
 };
 
+// Generates a duration of silence
 var makeSilence = function(duration){
 	var outRay=[];
 	for (var moment =0; moment<duration; moment++){
@@ -130,8 +178,14 @@ var makeSilence = function(duration){
 	return outRay;
 };
 
+// ***************************************************
 // Array manipulation functions
+// ***************************************************
 
+// These functions manipulate arrays in a great variety of ways
+
+// ***************************
+// Merge adds the durRay array to the canvasRay array at sample whereAt, with volume level
 var merge = function(durRay,canvasRay,whereAt,level){
 	var outRay = [];
 	var whereAt = typeof whereAt == 'undefined' ? 0:whereAt;
@@ -150,6 +204,9 @@ var merge = function(durRay,canvasRay,whereAt,level){
 	return outRay;
 };
 
+// ***************************
+// Substitute is similar to merge, however it also damps the volume of the canvasRay for the duration of durRay to a volume of value subtitutionLevel 
+// The reason for this, is to simulate how natural sounds sometimes overwelm each other when in succession, rather than co-exist.
 var substitute = function(durRay,canvasRay,whereAt,level,substitutionLevel){
 	var outRay=[];
 	var whereAt = typeof whereAt == 'undefined' ? 0:whereAt;
@@ -165,6 +222,8 @@ var substitute = function(durRay,canvasRay,whereAt,level,substitutionLevel){
 	return outRay;
 };
 
+// ***************************
+// Invert multiplies each amplitude by -1. Any sound and its inverse combined are silence.
 var invert = function(durRay){
 	var outRay = [];
 	for (var sample = 0; sample<durRay.length; sample++){
@@ -173,6 +232,8 @@ var invert = function(durRay){
 	return outRay;
 };
 
+// ***************************
+// Add a duration of silences at the beginning of a sound array.
 var padBefore = function(durRay,paddingAmount){
 	var outRay=[];
 	for (var padding = 0; padding<paddingAmount; padding++){
@@ -182,6 +243,8 @@ var padBefore = function(durRay,paddingAmount){
 	return outRay;
 };
 
+// ***************************
+// Add a duration of silence at the end of a sound array
 var padAfter = function(durRay,paddingAmount){
 	var outRay=[];
 	for (var padding = 0; padding<paddingAmount; padding++){
@@ -191,6 +254,9 @@ var padAfter = function(durRay,paddingAmount){
 	return outRay;	
 };
 
+// ***************************
+// Makes low amplitudes lower. 
+// Makes a 'computery' sound where noises come in packed bursts.
 var quietReducer = function(durRay,degree,amplitude){
 	var amplitude = amplitude*32767 || 32767;
 	var outRay =[];
@@ -208,6 +274,8 @@ var quietReducer = function(durRay,degree,amplitude){
 	return outRay;
 };
 
+// ***************************
+// Repeat the sound many times, with a decay, spaced out apart
 var delay = function(durRay,howMany,space,decay){
 	var outRay=[];
 	for (var moment = 0; moment<(durRay.length+(howMany*space)); moment++){
@@ -221,6 +289,10 @@ var delay = function(durRay,howMany,space,decay){
 	return outRay;
 };
 
+// ***************************
+// Reduces the range of increments of an amplitude. 
+// For example, an extent value 2, would remove all the odd numbered amplitudes
+// The amplitude essentially has a smaller number of bits
 var adjustAmplitudeResolution = function(durRay,extent){
 	var outRay=[];
 	for (var sample = 0; sample < durRay.length; sample++){
@@ -228,6 +300,8 @@ var adjustAmplitudeResolution = function(durRay,extent){
 	}
 };
 
+// ***************************
+// Make sure no amplitude exceeds a certain level.
 var clip = function(durRay,threshold){
 	var threshold = threshold * 32767;
 	var outRay=[];
@@ -242,6 +316,8 @@ var clip = function(durRay,threshold){
 	return outRay;
 };
 
+// ***************************
+// Change the every amplitude 
 var volumeChange = function(durRay,level){
 	var outRay = [];
 	for (var sample = 0; sample<durRay.length; sample++){
@@ -250,6 +326,10 @@ var volumeChange = function(durRay,level){
 	return outRay;
 };
 
+// ***************************
+// Make the volume fade out
+// If no value is given for endVolume, it fades out to silence
+// If no value is given to whereBegin, or whereEnd, it fades starting at the beginning, and ending at the ending of the array.
 var fadeOut=function(durRay,whereBegin,whereEnd,endVolume){
 	var whereBegin = whereBegin || 0;
 	var whereEnd = whereEnd || durRay.length-1;
@@ -268,6 +348,8 @@ var fadeOut=function(durRay,whereBegin,whereEnd,endVolume){
 	return outRay;
 };
 
+// ***************************
+// Identical to fade in, but where it begins at the modified volume, and eases into the normal volume.
 var fadeIn=function(durRay,whereBegin,whereEnd,startVolume){
 	var whereBegin = whereBegin || 0;
 	var whereEnd = whereEnd || durRay.length-1;
@@ -287,6 +369,8 @@ var fadeIn=function(durRay,whereBegin,whereEnd,startVolume){
 	return outRay;
 };
 
+// ***************************
+// Reverse the sound
 var reverse=function(durRay){
 	var outRay =[];
 	for (var sample =0; sample<durRay.length; sample++){
@@ -295,6 +379,11 @@ var reverse=function(durRay){
 	return outRay;
 };
 
+// ***************************
+// Change the speed of the sound, altering its frequency.
+// The argument change, should be how many times faster or slower you want the sound
+// For example '2' would double the speed.
+// Fraction values also work
 var changeSpeed = function(durRay,change){
 	var outRay=[];
 	var changes = factorize(change);
@@ -352,6 +441,22 @@ var changeSpeed = function(durRay,change){
 	return outRay;
 };
 
+// ***************************
+// Shift samples tries and recreate the sound, if it happened a fraction of a sample earlier or later
+// This function is useful for some esoteric reasons involved with the grainsynth function below
+// The simple explaination is that the period of many human-audible tones, happen at a non-integer
+// frequency. Rounding to integer values creates human-audible beats that result when sounds are
+// out of tune. 
+
+// The shiftSamples function is therefore essential to functions that create non-perceivable
+// sound phenamena, that determine the quality of seperate perceivable sound phemonena.
+
+// The argument 'shift' is a number between -1 and 1. 0.5 for example, produces an array
+// where every sample is a portion of two succeeding samples in durRay.
+
+// Whether the shift is positive or negative, only serves to decide if it will add one sample
+// of amplitude zero to the beginning, or end of the array, which insures the output is the same
+// length as the input
 var shiftSamples = function(durRay,shift){ // Shift is a number between -1 and 1.
 	var outRay = [];
 	var wipRay = [];
@@ -374,6 +479,14 @@ var shiftSamples = function(durRay,shift){ // Shift is a number between -1 and 1
 	return outRay;
 };
 
+// ***************************
+// For every segment of sound that falls between two drops in volume
+// Cut that segment out as an array, and add that array to an output array
+// Which will contain all the 'grains' found in the input array
+
+// Its not perfect, since every sound likely contains sounds below
+// certain amplitudes. It therefore is prejudiced against low frequencies.
+// That are for any given moment more likely to contain samples of any amplitude
 var cutUpEveryGrain = function(durRay,amplitudeThreshold){
 	var grains = [];
 	var beginning = 0;
@@ -388,6 +501,19 @@ var cutUpEveryGrain = function(durRay,amplitudeThreshold){
 	return grains;
 };
 
+// ***************************
+// Basic reverb simulation based off the freeverb algorithm ( I think )
+// Basically is delays the sound by the intervals given as elements of an input array
+// Then, it takes the sound of the delays, and 'undelays', meaning passes the echo
+// forward in time, the same way that we hear an echo after the original sound.
+
+// This partially simulates how reverb actually occurs. We hear a first reflection of
+// the sound, quietly, and then we hear an instant later several louder reflections of the
+// same sound, which decays into quiet noise.
+
+// The echo is therefore fixed by the decay array. I havent fooled around with the delay values
+// But I suspect the number of workable combinations is small, and it will be difficult to find
+// Other functional values.
 var reverb = function(durRay,decayZE,decayON,delaysZE,delaysON){
 	var delaysZE = [1115,1188,1356,1277,1422,1491,1617,1557] || delaysZE;
 	var delaysON = [255,556,441,341] || delaysON;
@@ -441,6 +567,18 @@ var reverb = function(durRay,decayZE,decayON,delaysZE,delaysON){
 	return reverbForwardPass(reverbBackPass(durRay,decayZE,delaysZE),decayON,delaysON);
 };
 
+// ***************************
+// Convolve is a novel way of simulating reverb. Enter another sound array 'convoluteSeed'
+// And simular durRay as if convoluteSeed were the profile of an echo.
+
+// For example, if convolute seed were [32767,0,0,17454,0], we would put the value of durRay
+// at point N, at n+1,n+2,n+3, and n+4, with the values corresponding the elements of the 
+// of [32767,0,017454,0]
+
+// convoluteSeed shouldnt be an array of a sound, but an array of how how a single 'ping' would
+// sound from a fixed point in a room. Any impulse of sound, is heard several times from a listener
+// at several volumes as it bounces off the walls in various ways. convoluteSeed should be how any
+// sound would sound in a given room.  
 var convolve = function(durRay,convoluteSeed,level){
 	var level = level || 0.05;
 	var outRay = [];
@@ -455,6 +593,15 @@ var convolve = function(durRay,convoluteSeed,level){
 	return outRay;
 };
 
+// ***************************
+// Declip, not the confused as an antagonist to the clip function
+
+// Declip makes sure the sound file starts and ends at 0.
+// It makes the sound quickly ramp up to its normal value, and quickly return to 0.
+// This is useful, because samples often have values that start at very high amplitudes
+// This causes speakers to 'pop' with the sudden change in amplitude.
+
+// Quickly, but not instantly, changing volume avoids that.
 var declip = function(durRay,margin){
 	if (durRay.length > 30){
 		var margin = margin || 30;		
@@ -462,6 +609,14 @@ var declip = function(durRay,margin){
 	return fadeIn(fadeOut(durRay,durRay.length-margin),0,margin);
 };
 
+// ***************************
+//  Change the frequency, but not the duration, of a sound file
+
+// if the grainLength is too low relative to the grainRate, it will 'tremolo', or flutter.
+// The grainLength should always be higher than the grainRate.
+
+// Not all combinations of grainLength, and grainRate will work. Most combinations silence certain
+// frequencies.
 var grainSynth = function(durRay,freqInc,grainLength,grainRate,fade){
 	var fade = fade || true;
 	var grains = [];
@@ -508,8 +663,12 @@ var grainSynth = function(durRay,freqInc,grainLength,grainRate,fade){
 	return outRay;
 };
 
+// ************************************************************
 // Math functions
+// ************************************************************
 
+// ***************************
+// Return the prime factors found in the numerator and denominator of a number, interpretted as a rational number.
 var factorize = function(fraction){
 	var numeratorsFactors = [];
 	var denominatorsFactors =[];
@@ -549,8 +708,15 @@ var factorize = function(fraction){
 	return [numeratorsFactors,denominatorsFactors];
 };
 
+// ************************************************************
 // System Functions
+// ************************************************************
 
+// **********************
+// openWave will open a wave file, and return an array containing arrays. 
+// The array elements of the returned array are the channels of the wave file.
+
+// One channel wave files, and therefore returned as an array, containing a single array, containing the sound samples
 var openWave = function(fileName){
 	var rawAudio = [];
 	var rawWave = fs.readFileSync(fileName);
@@ -579,6 +745,13 @@ var openWave = function(fileName){
 	return channels;
 };
 
+// **********************
+// The companion function of openWave
+
+// This function will turn an array of sound into a wave file.
+
+// Channels must be an array, containing array elements.
+// The array elements are the channels of the wave file.
 var buildFile = function(fileName,channels){
 	var manipulatedChannels = channels;
 	var sameLength = true;
