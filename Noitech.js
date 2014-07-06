@@ -10,9 +10,9 @@ var fs = require('fs');
 // Parameters dependent on time measurement and therefore also based in samples. 
 // A tone of 400 hertz, for example, must be given as 400/44100
 
-// All audio segments are arrays of numbers, whos elements correspond to audio samples of an amplitude within the range -32767 and 32767.
-// Arrays can be opened out of wave files with the 'openFile' function, and saved with the 'buildFile' function.
-// Amplitude values over 32767 or under -32767 are saved around the radix of 32767.
+// All audio segments are arrays of numbers, whos elements correspond to audio samples of an amplitude within the range
+// -32767 and 32767. Arrays can be opened out of wave files with the 'openFile' function, and saved with the 'buildFile'
+// function. Amplitude values over 32767 or under -32767 are saved around the radix of 32767.
 
 
 // ***************************************************
@@ -24,27 +24,30 @@ var fs = require('fs');
 
 // *********************
 // harmonicCount
-// Harmonic sounds, are sounds that consist of a tonic tone ( a frequency ) and harmonics ( a frequency that is the tonic tone times an integer )
-// The harmoincCount variable is how many harmonies you want to be generated 'on top' of your tonic tone (the argumnent 'tone')
-// More harmonics mean more computation. I have found 30 to be an adequate value as the harmonicCount argument
+// Harmonic sounds, are sounds that consist of a tonic tone ( a frequency ) and harmonics ( a frequency that is the tonic
+// tone times  an integer ). The harmoincCount variable is how many harmonies you want to be generated 'on top' of your 
+// tonic tone (the argumnent 'tone'). More harmonics mean more computation. I have found 30 to be an adequate value as 
+// the harmonicCount argument
 
 // *********************
 // enharmonicity
-// Enharmonicity generally means 'not harmonic', or the content of a sound that is noisy and not a function of the tonic frequency.
-// In my functions, is the degree that the harmonics are imperfect. Physical bodies that produce harmonic sounds (strings, bells, horns)
-// Have a tendency to produce harmonics that are actually a little higher in frequency than the integer multiple of their tonic
-// This is because the vibration actually increases the tension of the body, which increases the frequency for harmonics above that tonic
+// Enharmonicity generally means 'not harmonic', or the content of a sound that is noisy and not a function of the tonic
+// frequency. In my functions, is the degree that the harmonics are imperfect. Physical bodies that produce harmonic 
+// sounds (strings, bells, horns) have a tendency to produce harmonics that are actually a little higher in frequency 
+// than the integer multiple of their tonic This is because the vibration actually increases the tension of the body, 
+// which increases the frequency for harmonics above that tonic
 
 // The argument 'enharmonicity' should be a very very low number. 0.0007 is my medium value.
 
 // *********************
 // harmonicDecay
 // The argument harmonicDecay contributes a feature to my functions that is also based off a physical phenomenon of sound.
-// Many physical bodies that produce harmonic sounds, tend to begin with very loud high harmonics, and end with volume only in the
-// lower harmonics. The energy in higher frequencies physically expresses itself turbulently and 'decays' into lower frequencies.
+// Many physical bodies that produce harmonic sounds, tend to begin with very loud high harmonics, and end with volume 
+// only in the lower harmonics. The energy in higher frequencies physically expresses itself turbulently and 'decays' 
+// into lower frequencies.
 
-// The argument 'harmonic decay' is the rate at which high frequencies lower in volume, and the tonic frequency increases in volume.
-// All the harmonics decay in proportion to how high they are in frequency relative to the tonic frequency.
+// The argument 'harmonic decay' is the rate at which high frequencies lower in volume, and the tonic frequency increases
+// in volume. All the harmonics decay in proportion to how high they are in frequency relative to the tonic frequency.
 
 
 
