@@ -4,13 +4,13 @@
 var fs = require('fs');
 
 // This is Noitech, a collection of audio generating, manipulating, and saving functions. 
-//The plan is to expand this into a UI, with simular functionality to Audacity, but better suited for music composition.
+// The plan is to expand this into a UI, with simular functionality to Audacity, but better suited for music composition.
 
 // All durations are expressed in samples. The sample rate of 44100 is assumed. 
 // Parameters dependent on time measurement and therefore also based in samples. 
 // A tone of 400 hertz, for example, must be given as 400/44100
 
-// All audio segments are arrays of numbers, whos elements correspond to audio samples of an amplitude within the range
+// All audio segments are arrays of numbers, whos elements t are an amplitude at time t within the range
 // -32767 and 32767. Arrays can be opened out of wave files with the 'openFile' function, and saved with the 'buildFile'
 // function. Amplitude values over 32767 or under -32767 are saved around the radix of 32767.
 
@@ -19,13 +19,14 @@ var fs = require('fs');
 // Tone Making Functions
 // ***************************************************
 
-// For many of the tone making functions, there are the arguments 'harmonicCount', 'enharmonicity', and 'harmonicDecay'
+// For many of the tone making functions, there are the arguments 'harmonicCount', 'enharmonicity', and 'harmonicDecay'.
+// Only HarmonicCount is a necessaryargument. The others are optional, and do not need to be specified.
 // I will explain those below
 
 // *********************
 // harmonicCount
 // Harmonic sounds, are sounds that consist of a tonic tone ( a frequency ) and harmonics ( a frequency that is the tonic
-// tone times  an integer ). The harmoincCount variable is how many harmonies you want to be generated 'on top' of your 
+// tone times  an integer ). The harmoincCount variable is how many harmonics you want to be generated 'on top' of your 
 // tonic tone (the argumnent 'tone'). More harmonics mean more computation. I have found 30 to be an adequate value as 
 // the harmonicCount argument
 
@@ -575,7 +576,7 @@ var reverb = function(durRay,decayZE,decayON,delaysZE,delaysON){
 // And simular durRay as if convoluteSeed were the profile of an echo.
 
 // For example, if convolute seed were [32767,0,0,17454,0], we would put the value of durRay
-// at point N, at n+1,n+2,n+3, and n+4, with the values corresponding the elements of the 
+// at point N, at n+1,n+2,n+3, and n+4, with the amplitudes corresponding the elements of the 
 // of [32767,0,017454,0]
 
 // convoluteSeed shouldnt be an array of a sound, but an array of how how a single 'ping' would
@@ -599,15 +600,15 @@ var convolve = function(durRay,convoluteSeed,level){
 // ***************************
 // Declip, not the confused as an antagonist to the clip function
 
-// Declip makes sure the sound file starts and ends at 0.
-// It makes the sound quickly ramp up to its normal value, and quickly return to 0.
-// This is useful, because samples often have values that start at very high amplitudes
-// This causes speakers to 'pop' with the sudden change in amplitude.
-
-// Quickly, but not instantly, changing volume avoids that.
+// samples often have values that start at very high amplitudes. This causes speakers
+// to 'pop' with the sudden change in amplitude. The declip function makes the sample
+// start and end at an amplitude of zero, and quickly (in 30 samples) adjust to the samples
+// given volume
 var declip = function(durRay,margin){
-	if (durRay.length > 30){
-		var margin = margin || 30;		
+	var margin = 30 || margin;
+	while (durRay.length < margin){
+		margin/=2;
+		margin=Math.floor(margin);		
 	}
 	return fadeIn(fadeOut(durRay,durRay.length-margin),0,margin);
 };
@@ -615,10 +616,7 @@ var declip = function(durRay,margin){
 // ***************************
 //  Change the frequency, but not the duration, of a sound file
 
-// if the grainLength is too low relative to the grainRate, it will 'tremolo', or flutter.
-// The grainLength should always be higher than the grainRate.
-
-// Not all combinations of grainLength, and grainRate will work. Most combinations silence certain
+// Not all combinations of grainLength, and passes will work. Most combinations silence certain
 // frequencies.
 var grainSynth = function(durRay,freqInc,grainLength,passes,fade){
 	var grainRate = grainLength/passes;
@@ -659,6 +657,63 @@ var grainSynth = function(durRay,freqInc,grainLength,passes,fade){
 	for (var time = 0; time<durRay.length; time++){
 		outRay.push(0);
 	}
+	for (var grainIndex = 0; grainIndex<grains.length; grainIndex++){
+		for (var moment = 0; moment<grains[grainIndex].length; moment++){
+			outRay[moment+Math.floor((grainIndex/2)*grainRate)]+=grains[grainIndex][moment];
+		}
+	}
+	return outRay;
+};
+
+var glissando = function(durRay,endingFreq,grainLength,passes,fade){
+	var grainRate = grainLength/passes;
+	var fade = fade || true;
+	var grains = [];
+	var sampleSpot=0;
+	while (sampleSpot<durRay.length){
+		var startingSample = Math.floor(sampleSpot);
+		var sampleModulus = sampleSpot%1;
+		var thisGrainLength = 0;
+		grains.push([]);
+		if ((durRay.length-sampleSpot)>grainLength){
+			thisGrainLength=grainLength;
+		}
+		else{
+			thisGrainLength=durRay.length-sampleSpot;
+		}
+		grains.push(shiftSamples(durRay.slice(sampleSpot,sampleSpot+thisGrainLength),sampleModulus));
+		sampleSpot+=grainRate;
+	}
+	console.log('A');
+	var gradientLength=grains.length;
+	var freqIncrement=((endingFreq-1)/gradientLength);
+	console.log('FREQINCEMENT',freqIncrement);
+	if (fade){
+		for (var grain = 0; grain<grains.length; grain++){
+			console.log('GRAIN',grain,'GRAINS LEN',grains.length);
+			console.log('A.A');
+			grains[grain]=changeSpeed(grains[grain],((freqIncrement*grain)+1).toFixed(2));
+			console.log('A.B');
+			if (grains[grain].length>30){
+				grains[grain]=fadeIn(fadeOut(grains[grain]));
+			}
+			else{
+				grains[grain]=fadeIn(fadeOut(grains[grain]));
+			}
+			console.log('A.C');
+		}
+	}
+	else{
+		for (var grain = 0; grain<grains.length; grain++){
+			grains[grain]=changeSpeed(grains[grain],(freqIncrement*grain)+1);
+		}
+	}
+	console.log('B');
+	var outRay = [];
+	for (var time = 0; time<durRay.length; time++){
+		outRay.push(0);
+	}
+	console.log('C');
 	for (var grainIndex = 0; grainIndex<grains.length; grainIndex++){
 		for (var moment = 0; moment<grains[grainIndex].length; moment++){
 			outRay[moment+Math.floor((grainIndex/2)*grainRate)]+=grains[grainIndex][moment];
@@ -847,3 +902,5 @@ var buildFile = function(fileName,channels){
 	fs.writeFile(fileName,outputFile);
 
 };
+
+buildFile('glissando.wav',	[glissando(openWave('MCRide_metadataclean.wav')[0],1/4,2000,5)]);
