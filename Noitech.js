@@ -684,23 +684,17 @@ var glissando = function(durRay,endingFreq,grainLength,passes,fade){
 		grains.push(shiftSamples(durRay.slice(sampleSpot,sampleSpot+thisGrainLength),sampleModulus));
 		sampleSpot+=grainRate;
 	}
-	console.log('A');
 	var gradientLength=grains.length;
 	var freqIncrement=((endingFreq-1)/gradientLength);
-	console.log('FREQINCEMENT',freqIncrement);
 	if (fade){
 		for (var grain = 0; grain<grains.length; grain++){
-			console.log('GRAIN',grain,'GRAINS LEN',grains.length);
-			console.log('A.A');
 			grains[grain]=changeSpeed(grains[grain],((freqIncrement*grain)+1).toFixed(2));
-			console.log('A.B');
 			if (grains[grain].length>30){
 				grains[grain]=fadeIn(fadeOut(grains[grain]));
 			}
 			else{
 				grains[grain]=fadeIn(fadeOut(grains[grain]));
 			}
-			console.log('A.C');
 		}
 	}
 	else{
@@ -708,12 +702,10 @@ var glissando = function(durRay,endingFreq,grainLength,passes,fade){
 			grains[grain]=changeSpeed(grains[grain],(freqIncrement*grain)+1);
 		}
 	}
-	console.log('B');
 	var outRay = [];
 	for (var time = 0; time<durRay.length; time++){
 		outRay.push(0);
 	}
-	console.log('C');
 	for (var grainIndex = 0; grainIndex<grains.length; grainIndex++){
 		for (var moment = 0; moment<grains[grainIndex].length; moment++){
 			outRay[moment+Math.floor((grainIndex/2)*grainRate)]+=grains[grainIndex][moment];
@@ -903,4 +895,4 @@ var buildFile = function(fileName,channels){
 
 };
 
-buildFile('glissando.wav',	[glissando(openWave('MCRide_metadataclean.wav')[0],1/4,2000,5)]);
+buildFile('glissando.wav',	[glissando(openWave('MCRide_metadataclean.wav')[0],1/8,2000,5)]);
