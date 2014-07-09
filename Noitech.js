@@ -728,10 +728,10 @@ var lowpass = function(durRay,wing,mix){
 	for (var time = 0; time < wing; time++){
 		wipRay.push(durRay[durRay.length-1]);
 	}
-	var divisor = Math.pow(2,breath);
+	var divisor = Math.pow(2,wing);
 	var summation = 0;
 	var leftWing = [];
-	for (var iteration = 0; iteration<breath; iteration++){
+	for (var iteration = 0; iteration<wing; iteration++){
 		summation+=Math.pow(2,iteration);
 		leftWing.push(Math.pow(2,iteration));
 	}
@@ -739,15 +739,15 @@ var lowpass = function(durRay,wing,mix){
 	for (var element = 0; element<leftWing.length; element++){
 		rightWing.push(leftWing[leftWing.length-1-element]);
 	}
-	var factorRange = (leftWing.concat([divisor])).concat(rightWing);	
-	//summation*=2;
+	var factorRange = (leftWing.concat([Math.pow(2,wing)])).concat(rightWing);	
+	summation*=2;
 	divisor+=summation;
  	for (var sample = 0; sample<durRay.length; sample++){
  		var value = 0;
  		for (var element = 0; element<breath; element++){
  			value+=factorRange[element]*wipRay[sample+element];
  		}
- 		outRay[sample]=Math.round(value/divisor);
+ 		outRay[sample]=Math.round(value/(divisor));
  	}
  	for (var sample=0; sample<durRay.length; sample++){
  		outRay[sample]=(outRay[sample]*mix)+(durRay[sample]*(1-mix));
@@ -940,6 +940,6 @@ var buildFile = function(fileName,channels){
 
 };
 
-buildFile('lowpassWITH.wav',[lowpass(makeSaw(400/44100,44100*3,30),100,1)]);
-buildFile('lowpassWITHH.wav',[merge(lowpass(makeSaw(400/44100,44100*3,30),100,1),lowpass(makeSaw(400/44100,44100*3,30),200,1))]);
+buildFile('lowpassWITH.wav',[lowpass(makeSaw(400/44100,44100*3,30),2560,1)]);
 buildFile('lowpassWITHOUT.wav',[makeSaw(400/44100,44100*3,30)]);
+buildFile('Hipass.wav',[hipass(makeSaw(400/44100,44100*3,30),2560,1)]);
