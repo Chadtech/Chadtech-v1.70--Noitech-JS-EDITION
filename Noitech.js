@@ -714,7 +714,8 @@ var glissando = function(durRay,endingFreq,grainLength,passes,fade){
 	return outRay;
 };
 
-var lowpass = function(durRay,wing,mix){
+var lopass = function(durRay,wing,mix){
+	var mix = mix || 1;
 	var outRay = [];
 	var wipRay = [];
 	var breath = (wing*2)+1;
