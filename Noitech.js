@@ -714,6 +714,47 @@ var glissando = function(durRay,endingFreq,grainLength,passes,fade){
 	return outRay;
 };
 
+var lowpass = function(durRay,wing,mix){
+	var outRay = [];
+	var wipRay = [];
+	var breath = (wing*2)+1;
+	for (var time = 0; time < wing; time++){
+		wipRay.push(durRay[0]);
+	}
+	for (var sample = 0; sample < durRay.length; sample++){
+		wipRay.push(durRay[sample]);
+		outRay.push(0);
+	}
+	for (var time = 0; time < wing; time++){
+		wipRay.push(durRay[durRay.length-1]);
+	}
+	var divisor = Math.pow(2,breath);
+	var summation = 0;
+	var leftWing = [];
+	for (var iteration = 0; iteration<breath; iteration++){
+		summation+=Math.pow(2,iteration);
+		leftWing.push(Math.pow(2,iteration));
+	}
+	var rightWing = [];
+	for (var element = 0; element<leftWing.length; element++){
+		rightWing.push(leftWing[leftWing.length-1-element]);
+	}
+	var factorRange = (leftWing.concat([divisor])).concat(rightWing);	
+	summation*=2;
+	divisor+=summation;
+ 	for (var sample = 0; sample<durRay.length; sample++){
+ 		var value = 0;
+ 		for (var element = 0; element<breath; element++){
+ 			value+=factorRange[element]*wipRay[sample+element];
+ 		}
+ 		outRay[sample]=value;
+ 	}
+ 	for (var sample=0; sample<durRay.length; sample++){
+ 		outRay[sample]=(outRay[sample]*mix)+(durRay[sample]*(1-mix));
+ 	}
+ 	return outRay;
+};
+
 // ************************************************************
 // Math functions
 // ************************************************************
@@ -895,4 +936,4 @@ var buildFile = function(fileName,channels){
 
 };
 
-buildFile('glissando.wav',	[glissando(openWave('MCRide_metadataclean.wav')[0],1/8,2000,5)]);
+buildFile('glissando.wav',	[glissando(makeSaw(400/44100,44100*3,30),1/8,1500,7)]);
