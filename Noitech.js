@@ -740,20 +740,24 @@ var lowpass = function(durRay,wing,mix){
 		rightWing.push(leftWing[leftWing.length-1-element]);
 	}
 	var factorRange = (leftWing.concat([divisor])).concat(rightWing);	
-	summation*=2;
+	//summation*=2;
 	divisor+=summation;
  	for (var sample = 0; sample<durRay.length; sample++){
  		var value = 0;
  		for (var element = 0; element<breath; element++){
  			value+=factorRange[element]*wipRay[sample+element];
  		}
- 		outRay[sample]=value;
+ 		outRay[sample]=Math.round(value/divisor);
  	}
  	for (var sample=0; sample<durRay.length; sample++){
  		outRay[sample]=(outRay[sample]*mix)+(durRay[sample]*(1-mix));
  	}
  	return outRay;
 };
+
+var hipass = function(durRay,wing,mix){
+	return merge(durRay,invert(lowpass(durRay,wing,mix)));
+}
 
 // ************************************************************
 // Math functions
@@ -936,4 +940,6 @@ var buildFile = function(fileName,channels){
 
 };
 
-buildFile('glissando.wav',	[glissando(makeSaw(400/44100,44100*3,30),1/8,1500,7)]);
+buildFile('lowpassWITH.wav',[lowpass(makeSaw(400/44100,44100*3,30),100,1)]);
+buildFile('lowpassWITHH.wav',[merge(lowpass(makeSaw(400/44100,44100*3,30),100,1),lowpass(makeSaw(400/44100,44100*3,30),200,1))]);
+buildFile('lowpassWITHOUT.wav',[makeSaw(400/44100,44100*3,30)]);
