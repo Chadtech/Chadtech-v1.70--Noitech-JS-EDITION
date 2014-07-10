@@ -744,9 +744,15 @@ var lopass = function(durRay,wing,extent,mix){
 	var factorRange = (leftWing.concat([Math.pow(2,wing)])).concat(rightWing);	
 	summation*=2;
 	divisor+=summation;
+	if (extent<2){
+		divisor=factorRange.length;
+		for (var factor = 0; factor<factorRange.length; factor++){
+			factorRange[factor]=1;
+		}
+	}
  	for (var sample = 0; sample<durRay.length; sample++){
  		var value = 0;
- 		for (var element = 0; element<breath; element++){
+ 		for (var element = 0; element<factorRange.length; element++){
  			value+=factorRange[element]*wipRay[sample+element];
  		}
  		outRay[sample]=Math.round(value/(divisor));
@@ -941,3 +947,7 @@ var buildFile = function(fileName,channels){
 	fs.writeFile(fileName,outputFile);
 
 };
+
+buildFile('lopassMitOne.wav',[lopass(makeSaw(400/44100,44100*3,30),400,1)]);
+buildFile('lopassMitOne0.wav',[lopass(makeSaw(400/44100,44100*3,30),800,1)]);
+buildFile('lopassMitTwo.wav',[lopass(makeSaw(400/44100,44100*3,30),400,2)]);
