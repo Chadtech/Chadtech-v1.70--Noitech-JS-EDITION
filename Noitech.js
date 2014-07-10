@@ -719,7 +719,6 @@ var lopass = function(durRay,wing,extent,mix){
 	var mix = mix || 1;
 	var outRay = [];
 	var wipRay = [];
-	var breath = (wing*2)+1;
 	for (var time = 0; time < wing; time++){
 		wipRay.push(durRay[0]);
 	}
@@ -947,7 +946,3 @@ var buildFile = function(fileName,channels){
 	fs.writeFile(fileName,outputFile);
 
 };
-
-buildFile('lopassMitOne.wav',[lopass(makeSaw(400/44100,44100*3,30),400,1)]);
-buildFile('lopassMitOne0.wav',[lopass(makeSaw(400/44100,44100*3,30),800,1)]);
-buildFile('lopassMitTwo.wav',[lopass(makeSaw(400/44100,44100*3,30),400,2)]);
