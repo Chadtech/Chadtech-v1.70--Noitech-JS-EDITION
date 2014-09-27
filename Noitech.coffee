@@ -55,7 +55,7 @@ makeSine = (voiceParameters) ->
   while sample < voiceParameters.duration
     outRay.push amplitude * Math.sin(Math.PI * 2 * sample * tone)
     sample++
-  return outRay
+  return outRay 
 
 
 # Generates a Saw Tooth Wave form
@@ -63,18 +63,18 @@ makeSaw = (tone, duration, harmonicCount, amplitude, enharmonicity, harmonicDeca
   amplitude = amplitude * 32767 or 32767
   enharmonify = (enharmonicity, harmonic) ->
     value = (if typeof enharmonicity is "undefined" then 1 else Math.pow(1 + enharmonicity, harmonic))
-    value
+    return value
 
   decay = (harmonicDecay, harmonic, moment) ->
     if typeof harmonicDecay is "undefined"
       1
     else
       if harmonic > 1
-        1 - (Math.pow(moment / Math.pow(Math.pow(moment, 2) + 1, 0.5), harmonicDecay / harmonic))
+        return 1 - (Math.pow(moment / Math.pow(Math.pow(moment, 2) + 1, 0.5), harmonicDecay / harmonic))
       else
-        (moment) / (Math.pow(Math.pow(moment, 2) + 1, 0.5))
+        return (moment) / (Math.pow(Math.pow(moment, 2) + 1, 0.5))
 
-  outRay = []
+  outputArray = []
   moment = 0
 
   while moment < duration
